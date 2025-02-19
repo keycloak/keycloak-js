@@ -5,7 +5,7 @@
   "description": "A client-side JavaScript OpenID Connect library that can be used to secure web applications.",
   "scripts": {
     "lint": "standard",
-    "guides": "node guides/guides.mjs $npm_package_version"
+    "guides": "node docs/guides/guides.mjs $npm_package_version"
   },
   "exports": {
     ".": {
