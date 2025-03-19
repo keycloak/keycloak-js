@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Keycloak JS Tests</title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="color-scheme" content="light dark">
+    <script type="importmap">
+      {
+        "imports": {
+          "keycloak-js": "./keycloak.js"
+        }
+      }
+    </script>
+    <link rel="modulepreload" href="./keycloak.js">
+  </head>
+  <body>
+    <script type="module">
+      import Keycloak from 'keycloak-js'
+
+      globalThis.Keycloak = Keycloak
+      globalThis.keycloak = null
+    </script>
+  </body>
+</html>

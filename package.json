@@ -4,9 +4,12 @@
   "type": "module",
   "description": "A client-side JavaScript OpenID Connect library that can be used to secure web applications.",
   "scripts": {
-    "lint": "standard",
+    "lint": "ts-standard",
     "guides": "node docs/guides/guides.mjs $npm_package_version"
   },
+  "workspaces": [
+    "test"
+  ],
   "exports": {
     ".": {
       "types": "./lib/keycloak.d.ts",
@@ -37,13 +40,13 @@
     "oauth2",
     "authentication"
   ],
-  "standard": {
+  "ts-standard": {
     "ignore": [
       "lib/*"
     ]
   },
   "devDependencies": {
     "jszip": "^3.10.1",
-    "standard": "^17.1.2"
+    "ts-standard": "^12.0.2"
   }
 }
