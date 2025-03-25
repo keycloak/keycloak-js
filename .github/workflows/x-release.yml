@@ -69,7 +69,6 @@ jobs:
       - name: Create package tarball
         run: |
           npm pack
-          mv -T *.tgz keycloak-js.tgz
 
       - name: Create guides zip
         run: |
@@ -81,7 +80,7 @@ jobs:
           for i in `gh release view ${{ inputs.tag }} --json assets --jq '.assets[].name'`; do 
             test -f $i || gh release delete-asset ${{ inputs.tag }} $i -y
           done
-          gh release upload ${{ inputs.tag }} keycloak-js.tgz "docs/guides/target/keycloak-js-guides.zip" --clobber
+          gh release upload ${{ inputs.tag }} keycloak-js-${{ inputs.tag }}.tgz "docs/guides/target/keycloak-js-guides.zip" --clobber
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -97,7 +96,7 @@ jobs:
 
       - name: Publish to NPM
         if: ${{ !inputs.nightly }}
-        run: npm publish keycloak-js.tgz --access public --ignore-scripts ${{ inputs.gh-org != 'keycloak' && ' --dry-run' || '' }}
+        run: npm publish keycloak-js-${{ inputs.tag }}.tgz --access public --ignore-scripts ${{ inputs.gh-org != 'keycloak' && ' --dry-run' || '' }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
