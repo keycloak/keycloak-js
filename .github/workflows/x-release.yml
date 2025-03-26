@@ -70,6 +70,11 @@ jobs:
         run: |
           npm pack
 
+      - name: Rename nightly package tarball
+        if: ${{ inputs.nightly }}
+        run: |
+          mv -T *.tgz keycloak-js-${{ inputs.tag }}.tgz
+
       - name: Create guides zip
         run: |
           npm ci
