@@ -112,6 +112,12 @@ export interface KeycloakInitOptions {
 	idToken?: string;
 
 	/**
+	 * Disables forced refresh for the initial tokens and instead checks if
+	 * they're still valid (only together with `token` and `refreshToken`)
+	 */
+	disableInitialForcedRefresh?: boolean;
+
+	/**
 	 * Set an initial value for skew between local time and Keycloak server in
 	 * seconds (only together with `token` or `refreshToken`).
 	 */
