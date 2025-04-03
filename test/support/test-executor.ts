@@ -1,51 +1,111 @@
-import type { Page } from 'playwright'
+import type { ConsoleMessage, Page } from 'playwright'
 import type Keycloak from '../../lib/keycloak.d.ts'
 import type { KeycloakConfig, KeycloakInitOptions, KeycloakLoginOptions, KeycloakLogoutOptions } from '../../lib/keycloak.d.ts'
-import { APP_HOST, AUTH_SERVER_HOST, AUTHORIZED_PASSWORD, AUTHORIZED_USERNAME, CLIENT_ID } from './common.ts'
+import { AUTHORIZED_PASSWORD, AUTHORIZED_USERNAME, CLIENT_ID } from './common.ts'
+import type { TestOptions } from './testbed.ts'
+
+interface ValueResult<T> {
+  value: T
+}
+
+interface ErrorResult {
+  error: Error
+}
+
+type Result<T> = ValueResult<T> | ErrorResult
+
+function isErrorResult<T> (result: Result<T>): result is ErrorResult {
+  return 'error' in result
+}
+
+export type TestExecutorOptions = Pick<TestOptions, 'appUrl' | 'authServerUrl'>
 
 export class TestExecutor {
   readonly #page: Page
   readonly #realm: string
+  readonly #options: TestExecutorOptions
+  #consoleMessages: ConsoleMessage[] = []
 
-  constructor (page: Page, realm: string) {
+  constructor (page: Page, realm: string, options: TestExecutorOptions) {
     this.#page = page
     this.#realm = realm
+    this.#options = options
+
+    // Intercept all console messages.
+    this.#page.on('console', (message) => {
+      this.#consoleMessages.push(message)
+    })
   }
 
-  async instantiateAdapter (config: KeycloakConfig = { url: AUTH_SERVER_HOST, realm: this.#realm, clientId: CLIENT_ID }): Promise<void> {
+  async instantiateAdapter (config: KeycloakConfig = this.defaultConfig()): Promise<void> {
+    // Reset the console messages when instantiating the adapter.
+    this.#consoleMessages = []
     await this.#ensureOnAppPage()
+    // Wait for the Keycloak constructor to be exposed globally by the app.
+    // Sometimes the script that does so is not executed yet, so we need to wait for it.
+    await this.#page.waitForFunction(() => 'Keycloak' in globalThis)
     await this.#page.evaluate((config) => {
       (globalThis as any).keycloak = new (globalThis as any).Keycloak(config)
     }, config)
   }
 
-  async initializeAdapter (options: KeycloakInitOptions = { onLoad: 'check-sso' }): Promise<boolean> {
-    await this.#ensureOnAppPage()
+  defaultConfig (): KeycloakConfig {
+    return {
+      url: this.#options.authServerUrl.toString(),
+      realm: this.#realm,
+      clientId: CLIENT_ID
+    }
+  }
+
+  async initializeAdapter (options?: KeycloakInitOptions, shouldRedirect = false): Promise<boolean> {
     await this.#ensureInstantiated()
 
-    let result
+    let result: Result<boolean>
     try {
       // Because `.evaluate()` can throw an error if a navigation occurs, we need to capture the result
       // to differentiate between the error thrown by the adapter and the error thrown by an unexpected navigation.
       result = await this.#page.evaluate(async (options) => {
         try {
           const value = await ((globalThis as any).keycloak as Keycloak).init(options)
-          return { value, error: null }
+          return { value }
         } catch (error) {
-          return { value: null, error }
+          return { error: error as Error }
         }
       }, options)
+
+      if (shouldRedirect) {
+        throw new Error('Expected a redirect to occur during initialization, but it did not.')
+      }
     } catch {
-      // The only reason an error is thrown here is because the page navigated, which is expected and can be ignored.
-      result = { value: null, error: null }
+      // The only reason an error is caught here is because the page navigated.
+      if (!shouldRedirect) {
+        throw new Error('Did not expect a redirect to occur during initialization, but it did.')
+      }
+
+      // We need to re-initialize the adapter after being redirected back to the app.
+      return await this.initializeAdapter(options)
     }
 
-    if (result.error !== null) {
+    if (isErrorResult(result)) {
       // The error is not related to the navigation, so we need to throw it.
-      throw result.error as Error
+      throw result.error
     }
 
-    return result.value ?? false
+    return result.value
+  }
+
+  defaultInitOptions (): KeycloakInitOptions {
+    return {
+      enableLogging: true
+    }
+  }
+
+  silentSSORedirectUrl (): URL {
+    return new URL('./silent-check-sso.html', this.#options.appUrl)
+  }
+
+  consoleMessages (): ConsoleMessage[] {
+    return this.#consoleMessages
   }
 
   async submitLoginForm (username = AUTHORIZED_USERNAME, password = AUTHORIZED_PASSWORD): Promise<void> {
@@ -107,12 +167,24 @@ export class TestExecutor {
       throw result.error as Error
     }
 
+    await this.#page.waitForNavigation()
     await this.#waitForAppPage()
   }
 
+  async isAuthenticated (): Promise<boolean> {
+    await this.#assertInstantiated()
+    return await this.#page.evaluate(() => {
+      return ((globalThis as any).keycloak as Keycloak).authenticated as boolean
+    })
+  }
+
+  async reload (): Promise<void> {
+    await this.#page.reload()
+  }
+
   async #ensureOnAppPage (): Promise<void> {
-    if (!this.#page.url().startsWith(APP_HOST)) {
-      await this.#page.goto(APP_HOST)
+    if (!this.#page.url().startsWith(this.#options.appUrl.origin)) {
+      await this.#page.goto(this.#options.appUrl.toString())
     }
   }
 
@@ -131,7 +203,7 @@ export class TestExecutor {
   async #isInstantiated (): Promise<boolean> {
     try {
       return await this.#page.evaluate(() => {
-        return ((globalThis as any).keycloak as Keycloak | null) !== null
+        return ((globalThis as any).keycloak as Keycloak | undefined) !== undefined
       })
     } catch {
       return false
@@ -139,10 +211,10 @@ export class TestExecutor {
   }
 
   async #waitForAppPage (): Promise<void> {
-    await this.#page.waitForURL(APP_HOST + '/**')
+    await this.#page.waitForURL(this.#options.appUrl.origin + '/**')
   }
 
   async #waitForLoginPage (): Promise<void> {
-    await this.#page.waitForURL(AUTH_SERVER_HOST + '/**')
+    await this.#page.waitForURL(this.#options.authServerUrl.origin + '/**')
   }
 }

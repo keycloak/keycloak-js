@@ -16,10 +16,9 @@
   </head>
   <body>
     <script type="module">
+      // Expose Keycloak constructor globally so that the tests can access it.
       import Keycloak from 'keycloak-js'
-
       globalThis.Keycloak = Keycloak
-      globalThis.keycloak = null
     </script>
   </body>
 </html>

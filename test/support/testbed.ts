@@ -1,8 +1,23 @@
 import type CredentialRepresentation from '@keycloak/keycloak-admin-client/lib/defs/credentialRepresentation.ts'
+import type { Page } from '@playwright/test'
+import { test as base } from '@playwright/test'
 import { adminClient } from './admin-client.ts'
-import { APP_HOST, AUTHORIZED_PASSWORD, AUTHORIZED_USERNAME, CLIENT_ID, UNAUTHORIZED_PASSWORD, UNAUTHORIZED_USERNAME } from './common.ts'
+import { APP_URL, AUTH_SERVER_URL, AUTHORIZED_PASSWORD, AUTHORIZED_USERNAME, CLIENT_ID, UNAUTHORIZED_PASSWORD, UNAUTHORIZED_USERNAME } from './common.ts'
+import { TestExecutor, type TestExecutorOptions } from './test-executor.ts'
 
-export async function createTestResources (): Promise<string> {
+export interface TestOptions {
+  appUrl: URL
+  authServerUrl: URL
+  strictCookies: boolean
+}
+
+export const test = base.extend<TestOptions>({
+  appUrl: [APP_URL, { option: true }],
+  authServerUrl: [AUTH_SERVER_URL, { option: true }],
+  strictCookies: [false, { option: true }]
+})
+
+export async function createTestBed (page: Page, options: TestExecutorOptions): Promise<TestExecutor> {
   const { realmName } = await adminClient.realms.create({
     realm: crypto.randomUUID(),
     enabled: true
@@ -59,12 +74,12 @@ export async function createTestResources (): Promise<string> {
     realm: realmName,
     enabled: true,
     clientId: CLIENT_ID,
-    redirectUris: [`${APP_HOST}/*`],
-    webOrigins: [APP_HOST],
+    redirectUris: [`${options.appUrl.origin}/*`],
+    webOrigins: [options.appUrl.origin],
     publicClient: true
   })
 
-  return realmName
+  return new TestExecutor(page, realmName, options)
 }
 
 type CreateUserParams = NonNullable<Parameters<typeof adminClient.users.create>[0]>
