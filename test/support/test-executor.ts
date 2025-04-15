@@ -1,6 +1,6 @@
 import type { ConsoleMessage, Page } from 'playwright'
 import type Keycloak from '../../lib/keycloak.d.ts'
-import type { KeycloakConfig, KeycloakInitOptions, KeycloakLoginOptions, KeycloakLogoutOptions } from '../../lib/keycloak.d.ts'
+import type { KeycloakConfig, KeycloakInitOptions, KeycloakLoginOptions, KeycloakLogoutOptions, KeycloakProfile, KeycloakTokenParsed } from '../../lib/keycloak.d.ts'
 import { AUTHORIZED_PASSWORD, AUTHORIZED_USERNAME, CLIENT_ID } from './common.ts'
 import type { TestOptions } from './testbed.ts'
 
@@ -82,6 +82,12 @@ export class TestExecutor {
         throw new Error('Did not expect a redirect to occur during initialization, but it did.')
       }
 
+      // When login-required is set, the page will redirect to the login page.
+      // Therefore, re-initializing the adapter can be skipped and we can assume the user is not authenticated.
+      if (options?.onLoad === 'login-required') {
+        return false
+      }
+
       // We need to re-initialize the adapter after being redirected back to the app.
       return await this.initializeAdapter(options)
     }
@@ -114,6 +120,13 @@ export class TestExecutor {
     await this.#page.getByRole('button', { name: 'Sign In' }).click()
   }
 
+  async createLoginUrl (options: KeycloakLoginOptions): Promise<string> {
+    await this.#assertInstantiated()
+    return await this.#page.evaluate(async (options) => {
+      return await ((globalThis as any).keycloak as Keycloak).createLoginUrl(options)
+    }, options)
+  }
+
   async login (options?: KeycloakLoginOptions): Promise<void> {
     await this.#assertInstantiated()
 
@@ -138,8 +151,6 @@ export class TestExecutor {
       // The error is not related to the navigation, so we need to throw it.
       throw result.error as Error
     }
-
-    await this.#waitForLoginPage()
   }
 
   async logout (options?: KeycloakLogoutOptions): Promise<void> {
@@ -168,13 +179,47 @@ export class TestExecutor {
     }
 
     await this.#page.waitForNavigation()
-    await this.#waitForAppPage()
+  }
+
+  async updateToken (minValidity?: number): Promise<boolean> {
+    await this.#assertInstantiated()
+    return await this.#page.evaluate(async (minValidity) => {
+      return await ((globalThis as any).keycloak as Keycloak).updateToken(minValidity)
+    }, minValidity)
+  }
+
+  async addTimeSkew (addition: number): Promise<void> {
+    await this.#assertInstantiated()
+    await this.#page.evaluate((addition) => {
+      (((globalThis as any).keycloak as Keycloak).timeSkew as number) += addition
+    }, addition)
+  }
+
+  async loadUserProfile (): Promise<KeycloakProfile> {
+    await this.#assertInstantiated()
+    return await this.#page.evaluate(async () => {
+      return await ((globalThis as any).keycloak as Keycloak).loadUserProfile()
+    })
   }
 
   async isAuthenticated (): Promise<boolean> {
     await this.#assertInstantiated()
     return await this.#page.evaluate(() => {
       return ((globalThis as any).keycloak as Keycloak).authenticated as boolean
+    })
+  }
+
+  async isTokenExpired (minValidity?: number): Promise<boolean> {
+    await this.#assertInstantiated()
+    return await this.#page.evaluate((minValidity) => {
+      return ((globalThis as any).keycloak as Keycloak).isTokenExpired(minValidity)
+    }, minValidity)
+  }
+
+  async tokenParsed (): Promise<KeycloakTokenParsed | undefined> {
+    await this.#assertInstantiated()
+    return await this.#page.evaluate(() => {
+      return ((globalThis as any).keycloak as Keycloak).tokenParsed
     })
   }
 
@@ -208,13 +253,5 @@ export class TestExecutor {
     } catch {
       return false
     }
-  }
-
-  async #waitForAppPage (): Promise<void> {
-    await this.#page.waitForURL(this.#options.appUrl.origin + '/**')
-  }
-
-  async #waitForLoginPage (): Promise<void> {
-    await this.#page.waitForURL(this.#options.authServerUrl.origin + '/**')
   }
 }
