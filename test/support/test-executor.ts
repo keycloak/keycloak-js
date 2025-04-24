@@ -120,7 +120,7 @@ export class TestExecutor {
     await this.#page.getByRole('button', { name: 'Sign In' }).click()
   }
 
-  async createLoginUrl (options: KeycloakLoginOptions): Promise<string> {
+  async createLoginUrl (options?: KeycloakLoginOptions): Promise<string> {
     await this.#assertInstantiated()
     return await this.#page.evaluate(async (options) => {
       return await ((globalThis as any).keycloak as Keycloak).createLoginUrl(options)

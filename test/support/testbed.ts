@@ -21,6 +21,7 @@ export const test = base.extend<TestOptions>({
 
 export interface TestBed {
   executor: TestExecutor
+  realm: string
   updateRealm: (changes: RealmRepresentation) => Promise<void>
   updateClient: (changes: ClientRepresentation) => Promise<void>
 }
@@ -88,6 +89,7 @@ export async function createTestBed (page: Page, options: TestExecutorOptions): 
   })
 
   return {
+    realm,
     executor: new TestExecutor(page, realm, options),
     async updateRealm (changes) {
       const representation = await adminClient.realms.findOne({ realm })

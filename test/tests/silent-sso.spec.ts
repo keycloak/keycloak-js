@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test'
-import type { KeycloakInitOptions } from '../../lib/keycloak.js'
+import type { KeycloakInitOptions } from '../../lib/keycloak.d.ts'
 import { createTestBed, test } from '../support/testbed.ts'
 
 test('logs in with a silent SSO redirect', async ({ page, appUrl, authServerUrl, strictCookies }) => {
