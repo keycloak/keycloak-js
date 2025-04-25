@@ -171,13 +171,6 @@ export interface KeycloakInitOptions {
 	pkceMethod?: KeycloakPkceMethod;
 
 	/**
-	 * Configures the 'acr_values' query param in compliance with section 3.1.2.1
-	 * of the OIDC 1.0 specification.
-	 * Used to tell Keycloak what level of authentication the user needs.
-	 */
-	acrValues?: string;
-
-	/**
 	 * Enables logging messages from Keycloak to the console.
 	 * @default false
 	 */
