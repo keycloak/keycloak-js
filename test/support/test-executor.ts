@@ -127,6 +127,13 @@ export class TestExecutor {
     }, options)
   }
 
+  async createLogoutUrl (options?: KeycloakLogoutOptions): Promise<string> {
+    await this.#assertInstantiated()
+    return await this.#page.evaluate(async (options) => {
+      return ((globalThis as any).keycloak as Keycloak).createLogoutUrl(options)
+    }, options)
+  }
+
   async login (options?: KeycloakLoginOptions): Promise<void> {
     await this.#assertInstantiated()
 
