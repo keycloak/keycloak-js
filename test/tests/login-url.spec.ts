@@ -93,10 +93,10 @@ test('creates a login URL using the scope passed during initialization', async (
 
 test("creates a login URL with the 'openid' scope appended if omitted", async ({ page, appUrl, authServerUrl }) => {
   const { executor } = await createTestBed(page, { appUrl, authServerUrl })
-  const initOptions: KeycloakInitOptions = { ...executor.defaultInitOptions(), scope: 'profile email' }
+  const initOptions: KeycloakInitOptions = { ...executor.defaultInitOptions(), scope: 'profile email openidlike' }
   await executor.initializeAdapter(initOptions)
   const loginUrl = new URL(await executor.createLoginUrl())
-  expect(loginUrl.searchParams.get('scope')).toBe('openid profile email')
+  expect(loginUrl.searchParams.get('scope')).toBe('openid profile email openidlike')
 })
 
 test('creates a login URL using the response mode passed during initialization', async ({ page, appUrl, authServerUrl }) => {
