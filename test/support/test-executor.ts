@@ -1,6 +1,6 @@
 import type { ConsoleMessage, Page } from 'playwright'
 import type Keycloak from '../../lib/keycloak.d.ts'
-import type { KeycloakConfig, KeycloakInitOptions, KeycloakLoginOptions, KeycloakLogoutOptions, KeycloakProfile, KeycloakRegisterOptions, KeycloakTokenParsed } from '../../lib/keycloak.d.ts'
+import type { KeycloakAccountOptions, KeycloakConfig, KeycloakInitOptions, KeycloakLoginOptions, KeycloakLogoutOptions, KeycloakProfile, KeycloakRegisterOptions, KeycloakTokenParsed } from '../../lib/keycloak.d.ts'
 import { AUTHORIZED_PASSWORD, AUTHORIZED_USERNAME, CLIENT_ID } from './common.ts'
 import type { TestOptions } from './testbed.ts'
 
@@ -138,6 +138,13 @@ export class TestExecutor {
     await this.#assertInstantiated()
     return await this.#page.evaluate(async (options) => {
       return await ((globalThis as any).keycloak as Keycloak).createRegisterUrl(options)
+    }, options)
+  }
+
+  async createAccountUrl (options?: KeycloakAccountOptions): Promise<string> {
+    await this.#assertInstantiated()
+    return await this.#page.evaluate(async (options) => {
+      return ((globalThis as any).keycloak as Keycloak).createAccountUrl(options)
     }, options)
   }
 
