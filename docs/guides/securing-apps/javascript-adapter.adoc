@@ -304,20 +304,36 @@ An affected browser is for example Safari starting with version 13.1.
 
 === Constructor
 
+The recommended way of constructing the adapter is by passing the configuration directly:
+
 [source,javascript,subs="attributes+"]
 ----
-// Recommended way to initialize the adapter.
 new Keycloak({
     url: "http://keycloak-server",
     realm: "my-realm",
     clientId: "my-app"
 });
-
-// Alternatively a string to the path of the `keycloak.json` file.
-// Has some performance implications, as it will load the keycloak.json file from the server.
-// This version might also change in the future and is therefore not recommended.
-new Keycloak("http://keycloak-server/keycloak.json");
 ----
+
+Alternatively, it is possible to pass a URL to a JSON file that contains the configuration instead:
+
+[source,javascript,subs="attributes+"]
+----
+new Keycloak("http://your-app/adapter-config.json");
+----
+
+The JSON configuration file must include the following fields:
+
+[source,json,subs="attributes+"]
+----
+{
+    "auth-server-url": "https://auth.example.com",
+    "realm": "my-realm",
+    "resource": "my-app"
+}
+----
+
+Note that using a JSON configuration file will trigger an additional request before initialization, and is thus not recommended for performance reasons.
 
 === Properties
 

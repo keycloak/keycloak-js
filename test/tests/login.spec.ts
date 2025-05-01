@@ -1,8 +1,9 @@
 import { expect } from '@playwright/test'
-import type { KeycloakInitOptions } from '../../lib/keycloak.d.ts'
+import type { KeycloakConfig, KeycloakInitOptions } from '../../lib/keycloak.d.ts'
+import { CLIENT_ID } from '../support/common.ts'
 import { createTestBed, test } from '../support/testbed.ts'
 
-test('logs in and out', async ({ page, appUrl, authServerUrl }) => {
+test('logs in and out with default configuration', async ({ page, appUrl, authServerUrl }) => {
   const { executor } = await createTestBed(page, { appUrl, authServerUrl })
   const initOptions = executor.defaultInitOptions()
   // Initially, no user should be authenticated.
@@ -17,6 +18,46 @@ test('logs in and out', async ({ page, appUrl, authServerUrl }) => {
   // After logging out, the user should no longer be authenticated.
   expect(await executor.initializeAdapter(initOptions)).toBe(false)
   expect(await executor.isAuthenticated()).toBe(false)
+})
+
+test('logs in and out using a URL to the adapter config', async ({ page, appUrl, authServerUrl }) => {
+  const { executor, realm } = await createTestBed(page, { appUrl, authServerUrl })
+  const initOptions = executor.defaultInitOptions()
+  const configUrl = new URL('/adapter-config.json', appUrl)
+  configUrl.searchParams.set('realm', realm)
+  // Initially, no user should be authenticated.
+  await executor.instantiateAdapter(configUrl.toString())
+  expect(await executor.initializeAdapter(initOptions)).toBe(false)
+  await executor.login()
+  await executor.submitLoginForm()
+  // After triggering a login, the user should be authenticated.
+  await executor.instantiateAdapter(configUrl.toString())
+  expect(await executor.initializeAdapter(initOptions)).toBe(true)
+  await executor.logout()
+  // After logging out, the user should no longer be authenticated.
+  await executor.instantiateAdapter(configUrl.toString())
+  expect(await executor.initializeAdapter(initOptions)).toBe(false)
+})
+
+test('logs in and out using a generic OpenID provider', async ({ page, appUrl, authServerUrl }) => {
+  const { executor, realm } = await createTestBed(page, { appUrl, authServerUrl })
+  const initOptions = executor.defaultInitOptions()
+  const configOptions: KeycloakConfig = {
+    clientId: CLIENT_ID,
+    oidcProvider: new URL(`/realms/${realm}`, authServerUrl).toString()
+  }
+  // Initially, no user should be authenticated.
+  await executor.instantiateAdapter(configOptions)
+  expect(await executor.initializeAdapter(initOptions)).toBe(false)
+  await executor.login()
+  await executor.submitLoginForm()
+  // After triggering a login, the user should be authenticated.
+  await executor.instantiateAdapter(configOptions)
+  expect(await executor.initializeAdapter(initOptions)).toBe(true)
+  await executor.logout()
+  // After logging out, the user should no longer be authenticated.
+  await executor.instantiateAdapter(configOptions)
+  expect(await executor.initializeAdapter(initOptions)).toBe(false)
 })
 
 test('logs in and out without initialization options', async ({ page, appUrl, authServerUrl }) => {

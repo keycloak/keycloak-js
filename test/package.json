@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "test": "playwright test",
-    "app": "node app/app.js"
+    "app": "node app/app.ts"
   },
   "devDependencies": {
     "@keycloak/keycloak-admin-client": "^26.1.4",

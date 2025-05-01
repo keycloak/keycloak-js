@@ -38,6 +38,9 @@ jobs:
 
       - name: Set up workspace
         uses: ./.github/actions/setup
+        with:
+          # Use the latest Node.js version for TypeScript support.
+          node-version: 23
 
       - name: Install browsers
         run: npx playwright install --with-deps

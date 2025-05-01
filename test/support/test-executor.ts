@@ -37,7 +37,7 @@ export class TestExecutor {
     })
   }
 
-  async instantiateAdapter (config: KeycloakConfig = this.defaultConfig()): Promise<void> {
+  async instantiateAdapter (config: KeycloakConfig | string = this.defaultConfig()): Promise<void> {
     // Reset the console messages when instantiating the adapter.
     this.#consoleMessages = []
     await this.#ensureOnAppPage()
@@ -45,7 +45,7 @@ export class TestExecutor {
     // Sometimes the script that does so is not executed yet, so we need to wait for it.
     await this.#page.waitForFunction(() => 'Keycloak' in globalThis)
     await this.#page.evaluate((config) => {
-      (globalThis as any).keycloak = new (globalThis as any).Keycloak(config)
+      (globalThis as any).keycloak = new ((globalThis as any).Keycloak as typeof Keycloak)(config)
     }, config)
   }
 
@@ -220,6 +220,27 @@ export class TestExecutor {
     await this.#assertInstantiated()
     return await this.#page.evaluate(async () => {
       return await ((globalThis as any).keycloak as Keycloak).loadUserProfile()
+    })
+  }
+
+  async profile (): Promise<KeycloakProfile | undefined> {
+    await this.#assertInstantiated()
+    return await this.#page.evaluate(async () => {
+      return ((globalThis as any).keycloak as Keycloak).profile
+    })
+  }
+
+  async loadUserInfo (): Promise<{}> {
+    await this.#assertInstantiated()
+    return await this.#page.evaluate(async () => {
+      return await ((globalThis as any).keycloak as Keycloak).loadUserInfo()
+    })
+  }
+
+  async userInfo (): Promise<{}> {
+    await this.#assertInstantiated()
+    return await this.#page.evaluate(async () => {
+      return ((globalThis as any).keycloak as Keycloak).userInfo
     })
   }
 

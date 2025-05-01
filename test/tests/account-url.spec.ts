@@ -23,7 +23,7 @@ test('creates an account URL with default options', async ({ page, appUrl, authS
   expect(accountUrl.searchParams.get('referrer_uri')).toBe(appUrl.toString())
 })
 
-test('throws creating an account URL with generic OIDC configuration', async ({ page, appUrl, authServerUrl }) => {
+test('throws creating an account URL using a generic OpenID provider', async ({ page, appUrl, authServerUrl }) => {
   const { executor, realm } = await createTestBed(page, { appUrl, authServerUrl })
   const oidcProviderUrl = new URL(`/realms/${realm}`, authServerUrl)
   await executor.instantiateAdapter({
