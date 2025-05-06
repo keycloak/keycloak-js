@@ -31,5 +31,5 @@ test('throws loading the user profile using a generic OpenID provider', async ({
   await executor.submitLoginForm()
   await executor.instantiateAdapter(configOptions)
   await executor.initializeAdapter(initOptions)
-  await expect(executor.loadUserProfile()).rejects.toThrow('Unable to load user profile, make sure the adapter not is configured using a generic OIDC provider.')
+  await expect(executor.loadUserProfile()).rejects.toThrow('Unable to load user profile, make sure the adapter is not configured using a generic OIDC provider.')
 })

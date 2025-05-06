@@ -31,5 +31,5 @@ test('throws creating an account URL using a generic OpenID provider', async ({ 
     oidcProvider: oidcProviderUrl.toString()
   })
   await executor.initializeAdapter(executor.defaultInitOptions())
-  await expect(executor.createAccountUrl()).rejects.toThrow('Unable to create account URL, make sure the adapter not is configured using a generic OIDC provider.')
+  await expect(executor.createAccountUrl()).rejects.toThrow('Unable to create account URL, make sure the adapter is not configured using a generic OIDC provider.')
 })
