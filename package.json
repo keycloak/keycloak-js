@@ -4,24 +4,27 @@
   "type": "module",
   "description": "A client-side JavaScript OpenID Connect library that can be used to secure web applications.",
   "scripts": {
-    "lint": "ts-standard",
-    "guides": "node docs/guides/guides.mjs $npm_package_version"
+    "lint": "eslint . --ext .ts --report-unused-disable-directives --max-warnings 0",
+    "guides": "node docs/guides/guides.mjs $npm_package_version",
+    "build": "tsc",
+    "test": "vitest run",
+    "format": "prettier --write ."
   },
   "workspaces": [
     "test"
   ],
   "exports": {
     ".": {
-      "types": "./lib/keycloak.d.ts",
-      "default": "./lib/keycloak.js"
+      "types": "./dist/lib/keycloak.d.ts",
+      "default": "./dist/lib/keycloak.js"
     },
     "./authz": {
-      "types": "./lib/keycloak-authz.d.ts",
-      "default": "./lib/keycloak-authz.js"
+      "types": "./dist/lib/keycloak-authz.d.ts",
+      "default": "./dist/lib/keycloak-authz.js"
     }
   },
   "files": [
-    "lib"
+    "dist/lib"
   ],
   "publishConfig": {
     "access": "public"
@@ -40,14 +43,18 @@
     "oauth2",
     "authentication"
   ],
-  "ts-standard": {
-    "ignore": [
-      "lib/*"
-    ]
-  },
   "devDependencies": {
     "jszip": "^3.10.1",
-    "ts-standard": "^12.0.2"
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0",
+    "@vitest/coverage-v8": "^1.0.0",
+    "eslint": "^8.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "eslint-plugin-import": "^2.25.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "prettier": "^3.0.0"
   },
   "private": true
 }

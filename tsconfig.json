@@ -2,10 +2,30 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "NodeNext",
-    "noEmit": true,
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "alwaysStrict": true,
+    "esModuleInterop": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "noEmit": false,
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "erasableSyntaxOnly": true,
-    "strict": true
-  }
+    "declaration": true,
+    "outDir": "./dist",
+    "rootDir": ".",
+    "sourceMap": true
+  },
+  "include": [
+    "lib/**/*.ts"
+  ]
 }

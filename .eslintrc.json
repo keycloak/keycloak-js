@@ -1,0 +1,61 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "plugins": [
+    "@typescript-eslint",
+    "import",
+    "prettier"
+  ],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:import/typescript",
+    "prettier"
+  ],
+  "rules": {
+    "prettier/prettier": "warn",
+    "no-var": "error",
+    "no-let": "error",
+    "prefer-const": "error",
+    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "@typescript-eslint/prefer-readonly": "warn",
+    "import/order": [
+      "warn",
+      {
+        "groups": ["builtin", "external", "internal", "parent", "sibling", "index", "object", "type"],
+        "newlines-between": "always",
+        "alphabetize": { "order": "asc", "caseInsensitive": true }
+      }
+    ],
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "PropertyDefinition[accessibility='private']",
+        "message": "Use #privateField syntax instead of 'private' keyword for class fields."
+      },
+      {
+        "selector": "MethodDefinition[accessibility='private']",
+        "message": "Use #privateMethod syntax instead of 'private' keyword for class methods."
+      },
+      {
+        "selector": "TSAbstractPropertyDefinition[accessibility='private']",
+        "message": "Use #privateField syntax instead of 'private' keyword for class fields."
+      },
+      {
+        "selector": "TSAbstractMethodDefinition[accessibility='private']",
+        "message": "Use #privateMethod syntax instead of 'private' keyword for class methods."
+      }
+    ]
+  },
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "env": {
+    "es6": true,
+    "browser": true,
+    "node": true
+  },
+  "ignorePatterns": ["dist/", "node_modules/", "docs/", "test/app/"]
+}
