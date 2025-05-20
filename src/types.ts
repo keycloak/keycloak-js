@@ -122,3 +122,35 @@ export interface IKeycloakTokenParsed {
   resource_access?: IKeycloakResourceAccess;
   [key: string]: unknown;
 }
+
+export interface IOpenIdProviderMetadata extends Record<string, unknown> {
+  issuer?: string;
+  authorization_endpoint: string;
+  token_endpoint: string;
+  userinfo_endpoint?: string;
+  end_session_endpoint?: string;
+  check_session_iframe?: string;
+  jwks_uri?: string;
+  registration_endpoint?: string;
+  introspection_endpoint?: string;
+  revocation_endpoint?: string;
+}
+
+export interface IJsonConfig {
+  "auth-server-url": string;
+  realm: string;
+  resource?: string;
+  clientId?: string;
+  url?: string;
+  oidcProvider?: string | IOpenIdProviderMetadata;
+}
+
+export interface IAccessTokenResponse extends Record<string, unknown> {
+  access_token: string;
+  token_type: string;
+  expires_in?: number;
+  refresh_token?: string;
+  id_token?: string;
+  scope?: string;
+  session_state?: string;
+}

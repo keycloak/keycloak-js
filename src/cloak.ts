@@ -1,5 +1,3 @@
-// keycloak.ts
-
 import {
   randomUUID,
   randomBytes,
@@ -8,38 +6,22 @@ import {
   subtle,
 } from "crypto";
 import type {
+  IAccessTokenResponse,
+  IJsonConfig,
+  IKeycloakAccountOptions,
   IKeycloakAdapter,
   IKeycloakConfig,
+  IKeycloakInitOptions,
   IKeycloakLoginOptions,
   IKeycloakLogoutOptions,
   IKeycloakProfile,
   IKeycloakRegisterOptions,
   INetworkErrorOptions,
+  IOpenIdProviderMetadata,
+  KeycloakFlow,
+  KeycloakResponseMode,
 } from "./types.ts";
 import type { IEndpoints } from "./helpers.ts";
-/*
-import type {
-    IKeycloakAccountOptions,
-    IKeycloakLoginOptions,
-    IKeycloakLogoutOptions,
-    IKeycloakProfile,
-    IKeycloakRegisterOptions,
-    IJsonConfig,
-    IOpenIdProviderMetadata,
-    IAccessTokenResponse,
-    INetworkErrorOptions,
-    INetworkErrorOptionsProperties,
-    IKeycloakInitOptions,
-    IKeycloakConfig,
-    ICallbackState,
-    IAdapter,
-    IKeycloakEndpoints
-} from "./keycloak.d.ts";
-*/
-// --- UTILS ---
-
-type KeycloakFlow = "standard" | "implicit" | "hybrid";
-type KeycloakResponseMode = "query" | "fragment";
 
 const CONTENT_TYPE_JSON = "application/json";
 const STORAGE_KEY_PREFIX = "kc-callback-";
@@ -214,10 +196,10 @@ class LocalStorageCallbackStorage {
           try {
             return JSON.parse(value).expires;
           } catch {
-            return null;
+            return;
           }
         })();
-        if (expiry === null || expiry < now) localStorage.removeItem(key);
+        if (expiry === undefined || expiry < now) localStorage.removeItem(key);
       });
   }
 
@@ -352,9 +334,9 @@ interface ILoginIFrameOptions {
 
 export class Keycloak {
   // Required config values
-  public readonly clientId!: string;
-  public readonly realm!: string;
-  public readonly authServerUrl?: string;
+  clientId!: string;
+  realm!: string;
+  authServerUrl?: string;
 
   // Stateful properties
   public authenticated = false;
@@ -407,7 +389,7 @@ export class Keycloak {
   };
   #useNonce = true;
   #callbackStorage = createCallbackStorage();
-  #tokenTimeoutHandle: number | null = null;
+  #tokenTimeoutHandle?: number;
   #refreshQueue: Array<{
     setSuccess: (v?: unknown) => void;
     setError: (v?: unknown) => void;
@@ -476,7 +458,8 @@ export class Keycloak {
       }
       this.flow = initOptions.flow;
     }
-    if (initOptions.timeSkew != null) this.timeSkew = initOptions.timeSkew;
+    if (initOptions.timeSkew !== undefined)
+      this.timeSkew = initOptions.timeSkew;
     if (initOptions.redirectUri) this.redirectUri = initOptions.redirectUri;
     if (initOptions.silentCheckSsoRedirectUri)
       this.silentCheckSsoRedirectUri = initOptions.silentCheckSsoRedirectUri;
@@ -535,57 +518,11 @@ export class Keycloak {
     const prompt = oauth.prompt;
     let timeLocal = Date.now();
 
-    if (oauth["kc_action_status"] && this.onActionUpdate) {
-      this.onActionUpdate(oauth["kc_action_status"], oauth["kc_action"]);
-    }
-    if (error) {
-      if (prompt !== "none") {
-        if (oauth.error_description === "authentication_expired") {
-          this.login(oauth.loginOptions);
-        } else {
-          const errorData = {
-            error,
-            error_description: oauth.error_description,
-          };
-          if (this.onAuthError) this.onAuthError(errorData);
-          setError(errorData);
-        }
-      } else {
-        setSuccess();
-      }
-      return;
-    }
-    if (this.flow !== "standard" && (oauth.access_token || oauth.id_token)) {
-      authSuccess(oauth.access_token, null, oauth.id_token, true);
-    }
-    if (this.flow !== "implicit" && code) {
-      this.#fetchAccessToken(
-        this.endpoints.token(),
-        code,
-        this.clientId,
-        decodeURIComponent(oauth.redirectUri),
-        oauth.pkceCodeVerifier,
-      )
-        .then((response) => {
-          authSuccess(
-            response.access_token,
-            response.refresh_token,
-            response.id_token,
-            this.flow === "standard",
-          );
-          this.#scheduleCheckIframe();
-        })
-        .catch((error) => {
-          if (this.onAuthError) this.onAuthError();
-          setError(error);
-        });
-    }
-
     const authSuccess = (
       accessToken: string,
-      refreshToken: string | null,
-      idToken: string | null,
-      fulfill: boolean,
+      refreshToken?: string,
+      idToken?: string,
+      fulfill?: boolean,
     ): void => {
       timeLocal = (timeLocal + Date.now()) / 2;
       this.#setToken(
@@ -608,6 +545,52 @@ export class Keycloak {
         setSuccess();
       }
     };
+
+    if (oauth["kc_action_status"] && this.onActionUpdate) {
+      this.onActionUpdate(oauth["kc_action_status"], oauth["kc_action"]);
+    }
+    if (error) {
+      if (prompt !== "none") {
+        if (oauth.error_description === "authentication_expired") {
+          this.login(oauth.loginOptions);
+        } else {
+          const errorData = {
+            error,
+            error_description: oauth.error_description,
+          };
+          if (this.onAuthError) this.onAuthError(errorData);
+          setError(errorData);
+        }
+      } else {
+        setSuccess();
+      }
+      return;
+    }
+    if (this.flow !== "standard" && (oauth.access_token || oauth.id_token))
+      authSuccess(oauth.access_token, undefined, oauth.id_token, true);
+
+    if (this.flow !== "implicit" && code) {
+      this.#fetchAccessToken(
+        this.endpoints.token(),
+        code,
+        this.clientId,
+        decodeURIComponent(oauth.redirectUri),
+        oauth.pkceCodeVerifier,
+      )
+        .then((response) => {
+          authSuccess(
+            response.access_token,
+            response.refresh_token,
+            response.id_token,
+            this.flow === "standard",
+          );
+          this.scheduleCheckIframe();
+        })
+        .catch((error) => {
+          if (this.onAuthError) this.onAuthError();
+          setError(error);
+        });
+    }
   };
 
   #setToken = (
@@ -618,7 +601,7 @@ export class Keycloak {
   ): void => {
     if (this.#tokenTimeoutHandle) {
       clearTimeout(this.#tokenTimeoutHandle);
-      this.#tokenTimeoutHandle = null;
+      this.#tokenTimeoutHandle = undefined;
     }
     if (refreshToken) {
       this.refreshToken = refreshToken;
@@ -682,33 +665,30 @@ export class Keycloak {
   };
 
   #loadConfig = async (): Promise<void> => {
-    if (typeof this.config === "string") {
-      const config = await fetchJSON<IJsonConfig>(this.config);
+    if (typeof this.#config === "string") {
+      const config = await fetchJSON<IJsonConfig>(this.#config);
       this.authServerUrl = config["auth-server-url"];
       this.realm = config.realm;
       this.clientId = config.resource;
       this.endpoints = this.#defaultEndpoints();
-    } else if ("oidcProvider" in this.config && this.config.oidcProvider) {
-      let oidcConfig: IOpenIdProviderMetadata;
-      if (typeof this.config.oidcProvider === "string") {
-        let url =
-          this.config.oidcProvider.replace(/\/$/, "") +
-          "/.well-known/openid-configuration";
-        oidcConfig = await fetchJSON<IOpenIdProviderMetadata>(url);
-      } else {
-        oidcConfig = this.config.oidcProvider;
-      }
-      this.clientId = this.config.clientId;
+    } else if ("oidcProvider" in this.#config && this.#config.oidcProvider) {
+      const oidcConfig: IOpenIdProviderMetadata =
+        typeof this.#config.oidcProvider === "string"
+          ? await fetchJSON<IOpenIdProviderMetadata>(
+              `${this.#config.oidcProvider.replace(/\/$/, "")}/.well-known/openid-configuration`,
+            )
+          : this.#config.oidcProvider;
+      this.clientId = this.#config.clientId;
       this.endpoints = this.#oidcEndpoints(oidcConfig);
     } else {
-      this.authServerUrl = this.config.url;
-      this.realm = this.config.realm;
-      this.clientId = this.config.clientId;
+      this.authServerUrl = this.#config.url;
+      this.realm = this.#config.realm;
+      this.clientId = this.#config.clientId;
       this.endpoints = this.#defaultEndpoints();
     }
   };
 
-  #defaultEndpoints = (): IKeycloakEndpoints => {
+  #defaultEndpoints = (): IEndpoints => {
     const realmUrl = this.#getRealmUrl()!;
     return {
       authorize: () => `${realmUrl}/protocol/openid-connect/auth`,
@@ -723,9 +703,7 @@ export class Keycloak {
     };
   };
 
-  #oidcEndpoints = (
-    oidcConfig: IOpenIdProviderMetadata,
-  ): IKeycloakEndpoints => ({
+  #oidcEndpoints = (oidcConfig: IOpenIdProviderMetadata): IEndpoints => ({
     authorize: () => oidcConfig.authorization_endpoint,
     token: () => oidcConfig.token_endpoint,
     logout: () => {
@@ -919,7 +897,7 @@ export class Keycloak {
   public isTokenExpired = (minValidity?: number): boolean => {
     if (!this.tokenParsed || (!this.refreshToken && this.flow !== "implicit"))
       throw new Error("Not authenticated");
-    if (this.timeSkew == null) return true;
+    if (this.timeSkew == undefined) return true;
     let expiresIn =
       (this.tokenParsed["exp"] as number) -
       Math.ceil(Date.now() / 1000) +
