@@ -7,10 +7,10 @@
     "app": "node app/app.ts"
   },
   "devDependencies": {
-    "@keycloak/keycloak-admin-client": "^26.1.4",
-    "@playwright/test": "^1.51.1",
+    "@keycloak/keycloak-admin-client": "^26.2.4",
+    "@playwright/test": "^1.52.0",
     "@types/express": "^5.0.1",
-    "@types/node": "^22.13.14",
+    "@types/node": "^22.15.18",
     "express": "^5.1.0"
   }
 }
