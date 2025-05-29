@@ -1,6 +1,6 @@
 import type { ConsoleMessage, Page } from 'playwright'
 import type Keycloak from '../../lib/keycloak.d.ts'
-import type { KeycloakAccountOptions, KeycloakConfig, KeycloakInitOptions, KeycloakLoginOptions, KeycloakLogoutOptions, KeycloakProfile, KeycloakRegisterOptions, KeycloakTokenParsed } from '../../lib/keycloak.d.ts'
+import type { KeycloakAccountOptions, KeycloakConfig, KeycloakInitOptions, KeycloakLoginOptions, KeycloakLogoutOptions, KeycloakProfile, KeycloakRegisterOptions, KeycloakTokenParsed, KeycloakUserInfo } from '../../lib/keycloak.d.ts'
 import { AUTHORIZED_PASSWORD, AUTHORIZED_USERNAME, CLIENT_ID } from './common.ts'
 import type { TestOptions } from './testbed.ts'
 
@@ -230,14 +230,14 @@ export class TestExecutor {
     })
   }
 
-  async loadUserInfo (): Promise<{}> {
+  async loadUserInfo (): Promise<KeycloakUserInfo> {
     await this.#assertInstantiated()
     return await this.#page.evaluate(async () => {
       return await ((globalThis as any).keycloak as Keycloak).loadUserInfo()
     })
   }
 
-  async userInfo (): Promise<{} | undefined> {
+  async userInfo (): Promise<KeycloakUserInfo | undefined> {
     await this.#assertInstantiated()
     return await this.#page.evaluate(async () => {
       return ((globalThis as any).keycloak as Keycloak).userInfo
