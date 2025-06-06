@@ -237,7 +237,7 @@ export class TestExecutor {
     })
   }
 
-  async userInfo (): Promise<{}> {
+  async userInfo (): Promise<{} | undefined> {
     await this.#assertInstantiated()
     return await this.#page.evaluate(async () => {
       return ((globalThis as any).keycloak as Keycloak).userInfo
@@ -247,7 +247,7 @@ export class TestExecutor {
   async isAuthenticated (): Promise<boolean> {
     await this.#assertInstantiated()
     return await this.#page.evaluate(() => {
-      return ((globalThis as any).keycloak as Keycloak).authenticated as boolean
+      return ((globalThis as any).keycloak as Keycloak).authenticated
     })
   }
 

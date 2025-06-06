@@ -18,13 +18,13 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-export type KeycloakOnLoad = 'login-required'|'check-sso';
-export type KeycloakResponseMode = 'query'|'fragment';
-export type KeycloakResponseType = 'code'|'id_token token'|'code id_token token';
-export type KeycloakFlow = 'standard'|'implicit'|'hybrid';
+export type KeycloakOnLoad = 'login-required' | 'check-sso';
+export type KeycloakResponseMode = 'query' | 'fragment';
+export type KeycloakResponseType = 'code' | 'id_token token' | 'code id_token token';
+export type KeycloakFlow = 'standard' | 'implicit' | 'hybrid';
 export type KeycloakPkceMethod = 'S256' | false;
 
-export interface KeycloakConfig {
+export interface KeycloakServerConfig {
 	/**
 	 * URL to the Keycloak server, for example: http://keycloak-server/auth
 	 */
@@ -38,6 +38,33 @@ export interface KeycloakConfig {
 	 */
 	clientId: string;
 }
+
+export interface GenericOidcConfig {
+	/**
+	 * Client identifier, example: 'myapp'
+	 */
+	clientId: string;
+	/** Generic OpenID Connect configuration, can be a URL to the discovery metadata endpoint, or the metadata itself. */
+	oidcProvider: string | OpenIdProviderMetadata;
+}
+
+/**
+ * OpenIdProviderMetadata The OpenID version of the adapter configuration, based on the {@link https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata OpenID Connect Discovery specification}.
+ */
+export interface OpenIdProviderMetadata {
+	/** URL of the OP's OAuth 2.0 Authorization Endpoint. */
+	authorization_endpoint: string;
+	/** URL of the OP's OAuth 2.0 Token Endpoint. */
+	token_endpoint: string;
+	/** URL of the OP's UserInfo Endpoint. */
+	userinfo_endpoint?: string;
+	/**  URL of an OP iframe that supports cross-origin communications for session state information with the RP Client, using the HTML5 postMessage API. */
+	check_session_iframe?: string;
+	/** URL at the OP to which an RP can perform a redirect to request that the End-User be logged out at the OP. */
+	end_session_endpoint?: string;
+}
+
+export type KeycloakConfig = KeycloakServerConfig | GenericOidcConfig;
 
 export interface Acr {
 	/**
@@ -61,7 +88,7 @@ export interface KeycloakInitOptions {
 	useNonce?: boolean;
 
 	/**
-	 * 
+	 *
 	 * Allow usage of different types of adapters or a custom adapter to make Keycloak work in different environments.
 	 *
 	 * The following options are supported:
@@ -89,7 +116,7 @@ export interface KeycloakInitOptions {
 	 * ```
 	 */
 	adapter?: 'default' | 'cordova' | 'cordova-native' | KeycloakAdapter;
-	
+
 	/**
 	 * Specifies an action to do on load.
 	 */
@@ -177,12 +204,12 @@ export interface KeycloakInitOptions {
 	enableLogging?: boolean
 
 	/**
-	 * Set the default scope parameter to the login endpoint. Use a space-delimited list of scopes. 
+	 * Set the default scope parameter to the login endpoint. Use a space-delimited list of scopes.
 	 * Note that the scope 'openid' will be always be added to the list of scopes by the adapter.
 	 * Note that the default scope specified here is overwritten if the `login()` options specify scope explicitly.
 	 */
 	scope?: string
-	
+
 	/**
 	 * Configures how long will Keycloak adapter wait for receiving messages from server in ms. This is used,
 	 * for example, when waiting for response of 3rd party cookies check.
@@ -262,9 +289,9 @@ export interface KeycloakLoginOptions {
 	 */
 	idpHint?: string;
 
-				/**
+	/**
 	 * Sets the 'ui_locales' query param in compliance with section 3.1.2.1
-							 * of the OIDC 1.0 specification.
+	 * of the OIDC 1.0 specification.
 	 */
 	locale?: string;
 
@@ -295,11 +322,18 @@ export interface KeycloakAccountOptions {
 	/**
 	 * Specifies the uri to redirect to when redirecting back to the application.
 	 */
-	redirectUri?: string;	
+	redirectUri?: string;
 }
 export interface KeycloakError {
 	error: string;
 	error_description: string;
+}
+
+export interface KeycloakRedirectUriOptions {
+	/**
+	 * Specifies the uri to redirect to after login.
+	 */
+	redirectUri?: string;
 }
 
 export interface KeycloakAdapter {
@@ -307,7 +341,7 @@ export interface KeycloakAdapter {
 	logout(options?: KeycloakLogoutOptions): Promise<void>;
 	register(options?: KeycloakRegisterOptions): Promise<void>;
 	accountManagement(): Promise<void>;
-	redirectUri(options: { redirectUri: string; }, encodeHash: boolean): string;
+	redirectUri(options?: KeycloakRedirectUriOptions): string;
 }
 
 export interface KeycloakProfile {
@@ -367,7 +401,7 @@ declare class Keycloak {
 	/**
 	 * Is true if the user is authenticated, false otherwise.
 	 */
-	authenticated?: boolean;
+	authenticated: boolean;
 
 	/**
 	* The user id.
@@ -377,19 +411,19 @@ declare class Keycloak {
 	/**
 	* Response mode passed in init (default value is `'fragment'`).
 	*/
-	responseMode?: KeycloakResponseMode;
+	responseMode: KeycloakResponseMode;
 
 	/**
 	* Response type sent to Keycloak with login requests. This is determined
 	* based on the flow value used during initialization, but can be overridden
 	* by setting this value.
 	*/
-	responseType?: KeycloakResponseType;
+	responseType: KeycloakResponseType;
 
 	/**
 	* Flow passed in init.
 	*/
-	flow?: KeycloakFlow;
+	flow: KeycloakFlow;
 
 	/**
 	* The realm roles associated with the token.
@@ -437,17 +471,17 @@ declare class Keycloak {
 	* server in seconds. This value is just an estimation, but is accurate
 	* enough when determining if a token is expired or not.
 	*/
-	timeSkew?: number;
+	timeSkew: number | null;
 
 	/**
 	* Whether the instance has been initialized by calling `.init()`.
 	*/
 	didInitialize: boolean;
-	
+
 	/**
 	* @private Undocumented.
 	*/
-	loginRequired?: boolean;
+	loginRequired: boolean;
 
 	/**
 	* @private Undocumented.
@@ -497,7 +531,7 @@ declare class Keycloak {
 	/**
 	* Called if there was an error during authentication.
 	*/
-	onAuthError?(errorData: KeycloakError): void;
+	onAuthError?(errorData?: KeycloakError): void;
 
 	/**
 	* Called when the token is refreshed.
@@ -528,7 +562,7 @@ declare class Keycloak {
 	* @param status the outcome of the required action
 	* @param action the alias name of the required action, e.g. UPDATE_PASSWORD, CONFIGURE_TOTP etc.
 	*/
-	onActionUpdate?(status: 'success'|'cancelled'|'error', action?: string): void;
+	onActionUpdate?(status: 'success' | 'cancelled' | 'error', action?: string): void;
 
 	/**
 	* Called to initialize the adapter.
