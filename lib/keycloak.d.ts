@@ -382,6 +382,11 @@ export interface KeycloakRoles {
 	roles: string[];
 }
 
+export interface KeycloakUserInfo {
+	sub: string;
+	[key: string]: any;
+}
+
 /**
  * @deprecated Instead of importing 'KeycloakInstance' you can import 'Keycloak' directly as a type.
  */
@@ -516,7 +521,7 @@ declare class Keycloak {
 	/**
 	* @private Undocumented.
 	*/
-	userInfo?: {}; // KeycloakUserInfo;
+	userInfo?: KeycloakUserInfo;
 
 	/**
 	* Called when the adapter is initialized.
@@ -676,7 +681,7 @@ declare class Keycloak {
 	/**
 	* @private Undocumented.
 	*/
-	loadUserInfo(): Promise<{}>;
+	loadUserInfo(): Promise<KeycloakUserInfo>;
 }
 
 export default Keycloak;
