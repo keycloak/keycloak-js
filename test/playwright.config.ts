@@ -4,14 +4,6 @@ import type { TestOptions } from './support/testbed.ts'
 import { execSync } from 'child_process'
 
 const KEYCLOAK_VERSION = 'latest'
-
-const DEFAULT_KEYCLOAK_SERVER_CONFIG: PlaywrightTestConfig["webServer"] = {
-    command: "", // Nothing, has to be started before.
-    url: 'http://localhost:9000/health/live',
-    stdout: 'pipe',
-    reuseExistingServer: true, 
-};
-
 const CONTAINER_ENGINE_CONFIG: Record<string, Partial<PlaywrightTestConfig["webServer"]>> = {
   podman: {
     command: `podman run -p 8080:8080 -p 9000:9000 -e KC_BOOTSTRAP_ADMIN_USERNAME=admin -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin -e KC_HEALTH_ENABLED=true --pull=newer quay.io/keycloak/keycloak:${KEYCLOAK_VERSION} start-dev`,
@@ -46,7 +38,10 @@ if (!containerEngine) {
 export default defineConfig<TestOptions>({
   fullyParallel: true,
   webServer: [{
-    ...DEFAULT_KEYCLOAK_SERVER_CONFIG,
+    command: "", // Nothing, has to be started before.
+    url: 'http://localhost:9000/health/live',
+    stdout: 'pipe',
+    reuseExistingServer: true,
     ...(containerEngine ? CONTAINER_ENGINE_CONFIG[containerEngine] : {}),
   }, {
     command: 'npm run app',
