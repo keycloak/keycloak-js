@@ -77,10 +77,14 @@ npm test -- --debug
 
 ## Speeding up testing
 
-By default, the tests will run against a Keycloak server that is running the latest version. This server is started by Playwright using Podman by running the following command:
+By default, the tests will run against a Keycloak server that is running the latest version. This server is started by Playwright using Podman or Docker by running the following command:
 
 ```sh
+# Podman
 podman run -p 8080:8080 -p 9000:9000 -e KC_BOOTSTRAP_ADMIN_USERNAME=admin -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin -e KC_HEALTH_ENABLED=true --pull=newer quay.io/keycloak/keycloak:latest start-dev
+
+# Docker
+docker run -p 8080:8080 -p 9000:9000 -e KC_BOOTSTRAP_ADMIN_USERNAME=admin -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin -e KC_HEALTH_ENABLED=true --pull=always quay.io/keycloak/keycloak:${KEYCLOAK_VERSION} start-dev
 ```
 
 Alternatively, if you want to run the Keycloak server straight from the distribution (or your local development instance), without using Podman you can run it as follows:
