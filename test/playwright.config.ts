@@ -38,7 +38,7 @@ if (!containerEngine) {
 export default defineConfig<TestOptions>({
   fullyParallel: true,
   webServer: [{
-    command: "", // Nothing, has to be started before.
+    command: "",
     url: 'http://localhost:9000/health/live',
     stdout: 'pipe',
     reuseExistingServer: true,
