@@ -11,7 +11,7 @@ test('logs in with an implicit flow', async ({ page, appUrl, authServerUrl }) =>
   await executor.login()
   await expect(executor.initializeAdapter(implicitFlow)).rejects.toMatchObject({
     error: 'unauthorized_client',
-    error_description: 'Client+is+not+allowed+to+initiate+browser+login+with+given+response_type.+Implicit+flow+is+disabled+for+the+client.'
+    error_description: 'Client is not allowed to initiate browser login with given response_type. Implicit flow is disabled for the client.'
   })
   // After enabling implicit flow, authenticating with the standard flow should fail.
   await updateClient({ implicitFlowEnabled: true, standardFlowEnabled: false })
@@ -20,7 +20,7 @@ test('logs in with an implicit flow', async ({ page, appUrl, authServerUrl }) =>
   await executor.login()
   await expect(executor.initializeAdapter(standardFlow)).rejects.toMatchObject({
     error: 'unauthorized_client',
-    error_description: 'Client+is+not+allowed+to+initiate+browser+login+with+given+response_type.+Standard+flow+is+disabled+for+the+client.'
+    error_description: 'Client is not allowed to initiate browser login with given response_type. Standard flow is disabled for the client.'
   })
   // Now that the implicit flow is enabled, the user should be able to authenticate successfully.
   await executor.reload()
@@ -44,7 +44,7 @@ test('does not allow query response mode with an implicit flow', async ({ page, 
   await executor.login()
   await expect(executor.initializeAdapter(initOptions)).rejects.toMatchObject({
     error: 'invalid_request',
-    error_description: 'Response_mode+%27query%27+not+allowed+for+implicit+or+hybrid+flow'
+    error_description: "Response_mode 'query' not allowed for implicit or hybrid flow"
   })
 })
 
