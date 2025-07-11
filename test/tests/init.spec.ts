@@ -49,22 +49,18 @@ const errorParams = ['error', 'error_description', 'error_uri'];
 
   test(`[${responseMode} / ${flow}] should remove authorization response parameters from redirect URL`, async ({ page, appUrl, authServerUrl }) => {
     const { executor } = await createTestBed(page, { appUrl, authServerUrl });
-    const redirectUri = new URL('callback', appUrl);
+    const redirect = addRandomParams(appUrl, params, responseMode);
+
+    await page.goto(redirect.toString());
     await executor.initializeAdapter({
       responseMode: responseMode as KeycloakResponseMode,
       flow: flow as KeycloakFlow,
-      redirectUri: redirectUri.toString()
+      redirectUri: appUrl.toString()
     });
-
-    // Simulate a redirect with authorization response parameters
-    const redirect = addRandomParams(redirectUri, params, responseMode);
-
-    await page.goto(redirect.toString());
     // Wait for the adapter to process the redirect and clean up the URL
     await page.evaluate(() => {
       return new Promise((resolve) => setTimeout(resolve, 0));
     });
-
 
     // Check that the URL has been cleaned up
     const currentUrl = page.url();
