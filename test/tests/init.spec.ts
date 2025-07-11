@@ -35,14 +35,16 @@ const errorParams = ['error', 'error_description', 'error_uri'];
     params: [...hybridParams, ...errorParams]
   },
 ].forEach(({ flow, responseMode, params }) => {
-  const addRandomParams = (url: URL, params: string[], mode: string) => {
+  const addRandomParams = (url: Readonly<URL>, params: string[], mode: string) => {
+    const newUrl = new URL(url);
     for (const param of params) {
       if (mode === 'query') {
-        url.searchParams.set(param, `test-${param}`);
+        newUrl.searchParams.set(param, `test-${param}`);
       } else {
-        url.hash = `${url.hash ? url.hash + '&' : ''}${param}=test-${param}`;
+        newUrl.hash = `${newUrl.hash ? newUrl.hash + '&' : ''}${param}=test-${param}`;
       }
     }
+    return newUrl;
   };
 
   test(`[${responseMode} / ${flow}] should remove authorization response parameters from redirect URL`, async ({ page, appUrl, authServerUrl }) => {
@@ -55,10 +57,9 @@ const errorParams = ['error', 'error_description', 'error_uri'];
     });
 
     // Simulate a redirect with authorization response parameters
-    const redirect = new URL(redirectUri);
-    addRandomParams(redirect, params, responseMode);
+    const redirect = addRandomParams(redirectUri, params, responseMode);
 
-    await page.goto(redirectUri.toString());
+    await page.goto(redirect.toString());
     // Wait for the adapter to process the redirect and clean up the URL
     await page.evaluate(() => {
       return new Promise((resolve) => setTimeout(resolve, 0));
@@ -81,10 +82,10 @@ const errorParams = ['error', 'error_description', 'error_uri'];
     const { executor } = await createTestBed(page, { appUrl, authServerUrl });
 
     // Visit the App URL before initialization
-    addRandomParams(appUrl, params, responseMode);
-    await page.goto(appUrl.toString());
+    const newAppUrl = addRandomParams(appUrl, params, responseMode);
+    await page.goto(newAppUrl.toString());
 
-    const redirectUri = new URL('callback', appUrl);
+    const redirectUri = new URL('callback', newAppUrl);
     await executor.initializeAdapter({
       responseMode: responseMode as KeycloakResponseMode,
       flow: flow as KeycloakFlow,
