@@ -7,7 +7,6 @@ Everyone else from the community is welcome to comment on issues, answer questio
 
 In alphabetical order:
 
-* [Douglas Palmer](https://github.com/douglaspalmer)
 * [Giuseppe Graziano](https://github.com/graziang)
 * [Jon Koops](https://github.com/jonkoops)
 * [Marek Posolda](https://github.com/mposolda)
