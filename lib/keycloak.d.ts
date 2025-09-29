@@ -219,6 +219,12 @@ export interface KeycloakInitOptions {
 	messageReceiveTimeout?: number
 
 	/**
+	 * Configures whether the adapter should include the refresh token in the JWT.
+	 * @default true
+	 */
+	refreshTokenIsJWT?: boolean
+
+	/**
 	 * When onLoad is 'login-required', sets the 'ui_locales' query param in compliance with section 3.1.2.1
 	 * of the OIDC 1.0 specification.
 	 */
