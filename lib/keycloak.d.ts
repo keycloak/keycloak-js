@@ -228,6 +228,13 @@ export interface KeycloakInitOptions {
 	 * HTTP method for calling the end_session endpoint. Defaults to 'GET'.
 	 */
 	logoutMethod?: 'GET' | 'POST';
+
+	/**
+	 * Configures url parameters to forward to Keycloak server.
+	 * These are specified as an object with key-value pairs.
+	 * Note that the keys need to be enabled in the Keycloak server in the 'Forwarded parameters' section.
+	 */
+	forwardParameters?: { [key: string]: string };
 }
 
 export interface KeycloakLoginOptions {
@@ -294,6 +301,13 @@ export interface KeycloakLoginOptions {
 	 * of the OIDC 1.0 specification.
 	 */
 	locale?: string;
+
+	/**
+	 * Configures url parameters to forward to Keycloak server.
+	 * These are specified as an object with key-value pairs.
+	 * Note that the keys need to be enabled in the Keycloak server in the 'Forwarded parameters' section.
+	 */
+	forwardParameters?: { [key: string]: string };
 
 	/**
 	 * Specifies arguments that are passed to the Cordova in-app-browser (if applicable).
