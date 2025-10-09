@@ -139,8 +139,10 @@ export interface KeycloakInitOptions {
 	idToken?: string;
 
 	/**
-	 * Set an initial value for skew between local time and Keycloak server in
-	 * seconds (only together with `token` or `refreshToken`).
+	 * Set an initial value for skew between local and Keycloak server time (in
+	 * seconds). This is also used to determine whether the initial
+	 * token is still valid (only together with `token` or `refreshToken`).
+	 * @default 60
 	 */
 	timeSkew?: number;
 
@@ -472,8 +474,8 @@ declare class Keycloak {
 	idTokenParsed?: KeycloakTokenParsed;
 
 	/**
-	* The estimated time difference between the browser time and the Keycloak
-	* server in seconds. This value is just an estimation, but is accurate
+	* The estimated time difference between the browser and the Keycloak
+	* server time (in seconds). This value is just an estimation, but is accurate
 	* enough when determining if a token is expired or not.
 	*/
 	timeSkew: number | null;
