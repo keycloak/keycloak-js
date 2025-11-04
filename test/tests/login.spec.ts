@@ -159,3 +159,26 @@ test("logs in and out with onLoad set to 'check-sso'", async ({ page, appUrl, au
   await executor.reload()
   expect(await executor.initializeAdapter(initOptions, true)).toBe(true)
 })
+
+test('logs in and out with fragment', async ({ page, appUrl, authServerUrl }) => {
+  const { executor } = await createTestBed(page, {
+    appUrl: new URL(appUrl.toString() + 'fragment.html#fragment9'),
+    authServerUrl
+  })
+  const initOptions = executor.defaultInitOptions()
+  // Initially, no user should be authenticated.
+  expect(await executor.initializeAdapter(initOptions)).toBe(false)
+  expect(await executor.isAuthenticated()).toBe(false)
+  await executor.login()
+  await executor.submitLoginForm()
+  // After triggering a login, the user should be authenticated.
+  expect(await executor.initializeAdapter(initOptions)).toBe(true)
+  expect(await executor.isAuthenticated()).toBe(true)
+  // The fragment should be clicked and page scrolled to bottom
+  const scrollY = await page.evaluate(() => window.scrollY)
+  expect(scrollY).toBeGreaterThan(0)
+  await executor.logout()
+  // After logging out, the user should no longer be authenticated.
+  expect(await executor.initializeAdapter(initOptions)).toBe(false)
+  expect(await executor.isAuthenticated()).toBe(false)
+})
