@@ -6,7 +6,10 @@ export const CORDOVA_REDIRECT_URL = new URL("http://localhost");
 export async function setupCordovaMock(
   page: Page,
   appUrl: URL,
-  authServerUrl: URL
+  authServerUrl: URL,
+  options?: {
+    onInAppBrowserRedirect?: (refHandle: JSHandle<any>) => Promise<void>;
+  }
 ) {
   const browserContext = page.context();
   const refHandle = await getInAppBrowserRefMock(page);
@@ -15,7 +18,8 @@ export async function setupCordovaMock(
     page,
     refHandle,
     appUrl,
-    authServerUrl
+    authServerUrl,
+    options
   );
   await injectCordovaInAppBrowserMock(page, refHandle);
   return refHandle;
@@ -82,7 +86,10 @@ export async function setupEventTriggerOnNewPageForInAppBrowserRef(
   page: Page,
   refHandle: JSHandle<any>,
   appUrl: URL,
-  authServerUrl: URL
+  authServerUrl: URL,
+  options?: {
+    onInAppBrowserRedirect?: (refHandle: JSHandle<any>) => Promise<void>;
+  }
 ) {
   let currentlyOpenPage: Page | null = null;
   browserContext.on("page", async (newPage) => {
@@ -106,7 +113,13 @@ export async function setupEventTriggerOnNewPageForInAppBrowserRef(
       },
       { pageUrl }
     );
+
+    if (options?.onInAppBrowserRedirect) {
+      await options.onInAppBrowserRedirect(refHandle);
+      return;
+    }
   });
+
   await page.exposeFunction("closeInAppBrowserPage", async () => {
     if (currentlyOpenPage && !currentlyOpenPage.isClosed()) {
       await currentlyOpenPage.close();
