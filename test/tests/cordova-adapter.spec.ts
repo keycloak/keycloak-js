@@ -23,7 +23,7 @@ test.describe("Cordova adapter", () => {
     const initOptions = executor.cordovaInitOptions();
     expect(await executor.initializeAdapter(initOptions)).toBe(false);
     await setupCordovaMock(page, appUrl, authServerUrl);
-    
+
     const loginPromise = executor.login();
     await expect(loginPromise).resolves.toBeUndefined();
     expect(await executor.isAuthenticated()).toBe(true);
@@ -57,7 +57,7 @@ test.describe("Cordova adapter", () => {
     const initOptions = executor.cordovaInitOptions();
     expect(await executor.initializeAdapter(initOptions)).toBe(false);
     await setupCordovaMock(page, appUrl, authServerUrl);
-    
+
     const loginPromise = executor.login();
     await expect(loginPromise).resolves.toBeUndefined();
     expect(await executor.isAuthenticated()).toBe(true);
@@ -65,5 +65,31 @@ test.describe("Cordova adapter", () => {
     await executor.logout(undefined, true);
     expect(await executor.isAuthenticated()).toBe(false);
     expect(page.context().pages().length).toBe(1);
+  });
+
+  test("allow loaderror on InAppBrowser before finishing login", async ({
+    page,
+    appUrl,
+    authServerUrl,
+  }) => {
+    const { executor } = await createTestBed(page, { appUrl, authServerUrl });
+    const initOptions = executor.cordovaInitOptions();
+    expect(await executor.initializeAdapter(initOptions)).toBe(false);
+    const refHandle = await setupCordovaMock(page, appUrl, authServerUrl, {
+      onInAppBrowserRedirect: async (refHandle) => {
+        await refHandle.evaluate((ref) => {
+          ref._triggerEvent("loaderror", {
+            type: "loaderror",
+            url: "some other url",
+            code: -2,
+            message: "Simulated loaderror",
+          });
+        });
+      },
+    });
+
+    const loginPromise = executor.login();
+    await expect(loginPromise).resolves.toBeUndefined();
+    expect(await executor.isAuthenticated()).toBe(true);
   });
 });
