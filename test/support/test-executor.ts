@@ -106,6 +106,15 @@ export class TestExecutor {
     }
   }
 
+  cordovaInitOptions (): KeycloakInitOptions {
+    return {
+      ...this.defaultInitOptions(),
+      adapter: 'cordova',
+      // cordova adapter has 'http://localhost' as default redirectUri which wouldn't work unless we start another local app
+      redirectUri: "http://localhost:3000",
+    }
+  }
+
   silentSSORedirectUrl (): URL {
     return new URL('./silent-check-sso.html', this.#options.appUrl)
   }
@@ -174,7 +183,7 @@ export class TestExecutor {
     }
   }
 
-  async logout (options?: KeycloakLogoutOptions): Promise<void> {
+  async logout (options?: KeycloakLogoutOptions, skipWaitForNavigation?: boolean): Promise<void> {
     await this.#assertInstantiated()
 
     let result
@@ -199,7 +208,9 @@ export class TestExecutor {
       throw result.error as Error
     }
 
-    await this.#page.waitForNavigation()
+    if (!skipWaitForNavigation) {
+      await this.#page.waitForNavigation()
+    }
   }
 
   async updateToken (minValidity?: number): Promise<boolean> {
