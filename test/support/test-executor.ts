@@ -114,7 +114,7 @@ export class TestExecutor {
       ...this.defaultInitOptions(),
       adapter: 'cordova',
       // cordova adapter has 'http://localhost' as default redirectUri which wouldn't work unless we start another local app
-      redirectUri: "http://localhost:3000",
+      redirectUri: this.#options.appUrl.toString(),
     }
   }
 
