@@ -26,6 +26,7 @@ test('logs in with a redirect service between the application and auth server', 
   }
 
   // Initially, no user should be authenticated.
+  await executor.navigateToApp()
   expect(await executor.initializeAdapter(initOptions)).toBe(false)
   expect(await executor.isAuthenticated()).toBe(false)
 

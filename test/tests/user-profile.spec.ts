@@ -7,6 +7,7 @@ test('loads the user profile', async ({ page, appUrl, authServerUrl }) => {
   const { executor } = await createTestBed(page, { appUrl, authServerUrl })
   const initOptions = executor.defaultInitOptions()
   // Initially, no user should be authenticated and loading the user profile should fail.
+  await executor.navigateToApp()
   expect(await executor.initializeAdapter(initOptions)).toBe(false)
   await expect(executor.loadUserProfile()).rejects.toThrow('Unable to build authorization header, token is not set, make sure the user is authenticated.')
   await executor.login()
@@ -25,6 +26,7 @@ test('throws loading the user profile using a generic OpenID provider', async ({
     oidcProvider: new URL(`/realms/${realm}`, authServerUrl).toString()
   }
   const initOptions = executor.defaultInitOptions()
+  await executor.navigateToApp()
   await executor.instantiateAdapter(configOptions)
   await executor.initializeAdapter(initOptions)
   await executor.login()

@@ -6,6 +6,7 @@ import { createTestBed, test } from '../support/testbed.ts'
 
 test('creates a registration URL with all options', async ({ page, appUrl, authServerUrl }) => {
   const { executor, realm } = await createTestBed(page, { appUrl, authServerUrl })
+  await executor.navigateToApp()
   await executor.initializeAdapter(executor.defaultInitOptions())
   const redirectUri = new URL('/foo/bar', appUrl)
   const registerUrl = new URL(await executor.createRegisterUrl({
@@ -44,6 +45,7 @@ test('creates a registration URL with all options', async ({ page, appUrl, authS
 
 test('creates a registration URL with default options', async ({ page, appUrl, authServerUrl }) => {
   const { executor, realm } = await createTestBed(page, { appUrl, authServerUrl })
+  await executor.navigateToApp()
   await executor.initializeAdapter(executor.defaultInitOptions())
   const registerUrl = new URL(await executor.createRegisterUrl())
   expect(registerUrl.pathname).toBe(`/realms/${realm}/protocol/openid-connect/registrations`)
