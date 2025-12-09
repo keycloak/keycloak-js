@@ -10,7 +10,7 @@
     "@keycloak/keycloak-admin-client": "^26.1.4",
     "@playwright/test": "^1.51.1",
     "@types/express": "^5.0.6",
-    "@types/node": "^24.0.7",
+    "@types/node": "^24.10.2",
     "express": "^5.2.1"
   }
 }
