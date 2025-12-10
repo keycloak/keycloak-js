@@ -1,0 +1,35 @@
+This release of Keycloak JS focuses on addressing several regressions that were introduced by accident. We apologize for any inconvenience these issues may have caused and thank our community for reporting them quickly and helping to verify the fixes.
+
+== Bug Fixes
+
+=== Destructuring public methods now works correctly
+
+A regression was introduced that caused an error when destructuring public methods from a Keycloak instance. This pattern is commonly used in applications:
+
+[source,javascript]
+----
+const { login, logout } = keycloak;
+login(); // Previously failed with "Cannot read properties of undefined"
+----
+
+This issue has been resolved by binding all public methods to the class instance using arrow functions, ensuring that `this` is always correctly scoped regardless of how the method is called.
+
+https://github.com/keycloak/keycloak-js/issues/202[keycloak/keycloak-js#202]
+
+=== Hash fragments are now preserved in redirect URIs
+
+A regression caused hash fragments in URLs to be stripped from redirect URIs, which broke navigation in applications that rely on fragment-based routing. For example, when logging in to the Keycloak Admin Console with a URL like `http://localhost:8080/admin/master/console/#/demo/users/add-user`, the user would be redirected to the default page instead of the intended fragment after authentication.
+
+This also caused issues where redirect URIs would have a trailing slash added unexpectedly, breaking login flows for OIDC servers that perform strict URI matching.
+
+The next major of Keycloak JS will start re-enforcing this constraint, as it is not allowed to pass fragments according to https://datatracker.ietf.org/doc/html/rfc6749#section-3.1.2[the specification].
+
+https://github.com/keycloak/keycloak-js/issues/151[keycloak/keycloak-js#151], https://github.com/keycloak/keycloak-js/issues/205[keycloak/keycloak-js#205]
+
+=== Redirect URLs on different domains now work correctly
+
+A regression prevented redirect URLs from being on a different domain than the application origin the navigation to fail with a security error. This affected users who use redirect services that forward authentication requests from an intermediate domain back to the application.
+
+This behavior is likely to be changed in the future to only allow redirect URLs that are on the same origin as where Keycloak JS is initialized, in order to prevent possible open redirects. If this issue affects you please https://github.com/keycloak/keycloak-js/issues/235[join the discussion].
+
+https://github.com/keycloak/keycloak-js/issues/189[keycloak/keycloak-js#189]
