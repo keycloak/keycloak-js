@@ -18,7 +18,7 @@ test('preserves path-style URL fragment after login', async ({ page, appUrl, aut
   await executor.login()
   await executor.submitLoginForm()
 
-  // After login and adapter initialization, the URL fragment should be preserved without encoding.
+  // Re-initialize after OAuth redirect to process the callback parameters.
   await executor.initializeAdapter(initOptions)
   const finalHash = new URL(await page.url()).hash
 
@@ -42,6 +42,7 @@ test('preserves path-style fragment with query params after login', async ({ pag
   await executor.login()
   await executor.submitLoginForm()
 
+  // Re-initialize after OAuth redirect to process the callback parameters.
   await executor.initializeAdapter(initOptions)
   const finalHash = new URL(await page.url()).hash
 
