@@ -285,6 +285,88 @@ await keycloak.init({
 
 Naturally you can also do this without TypeScript by omitting the type information, but ensuring implementing the interface properly will then be left entirely up to you.
 
+[[_dpop]]
+== Securing Clients with DPoP
+DPoP is a mechanism that prevents token theft and replay attacks by generating sender-constrained access and refresh tokens. It allows a client to cryptographically prove possession of the private key bound to a token, provided the resource server supports the DPoP standard.
+
+[NOTE]
+====
+For more information on the DPoP standard, see the https://datatracker.ietf.org/doc/html/rfc9449[RFC 9449].
+====
+
+=== Key Storage and Persistence
+DPoP key pairs are persisted in IndexedDB, scoped to the specific issuer and client ID combination. This means keys survive page reloads and browser restarts, ensuring token continuity across sessions. If IndexedDB is unavailable, the adapter falls back to in-memory storage (keys will not survive page reloads). On logout, stored keys are automatically cleared.
+
+=== Initializing with DPoP
+Enabling DPoP requires passing a `useDPoP` configuration object to the `init` method. The quickest and most straightforward way to enable DPoP is:
+[source,javascript,subs="attributes+"]
+----
+await keycloak.init({
+    useDPoP: { 
+        mode: 'auto'
+    }
+});
+----
+
+WARNING: DPoP requires the https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API[Web Crypto API], which is only available in https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/Secure_Contexts[secure contexts] (HTTPS).
+
+When `mode` is set to `auto`, the adapter only uses DPoP if the authorization server advertises support for it in its OpenID configuration. If the server returns a non-DPoP token type, the adapter will log a warning and fall back to Bearer tokens for the remainder of the session. When `mode` is set to `strict`, the adapter will throw an error if the authorization server does not support DPoP or returns a non-DPoP token type.
+
+The adapter automatically generates DPoP proofs for token refresh requests, so no additional configuration is needed to maintain DPoP-bound tokens throughout the session lifecycle.
+
+Furthermore, you can specify which signing algorithm to use for DPoP keys. The supported algorithms are:
+
+* ES256
+* ES384
+* ES512
+* EdDSA
+
+[NOTE]
+====
+The default algorithm is ES256. Not all browsers support EdDSA keys — if a user's browser does not support it, the adapter will automatically fall back to ES256.
+====
+
+Setting a preferred algorithm can be done by setting `alg` to one of the supported algorithms:
+[source,javascript,subs="attributes+"]
+----
+await keycloak.init({
+    useDPoP: { 
+        mode: 'auto',
+        alg: 'EdDSA'
+    }
+});
+----
+
+=== Using `secureFetch` 
+The `secureFetch` function is simply a wrapper around the global `fetch` function that also handles the nonce management required by DPoP secured resource servers.
+
+Migrating from making a HTTP request using `fetch` to `secureFetch` is as simple as:
+[source,javascript,subs="attributes+"]
+----
+// Before migration with basic fetch
+const response = await fetch('/api/users', {
+    headers: {
+        accept: 'application/json',
+        authorization: `Bearer ${r"${keycloak.token}"}`
+    }
+});
+
+// After migration with secureFetch
+const response = await keycloak.secureFetch('/api/users', {
+    headers: {
+        accept: 'application/json',
+        authorization: `Bearer ${r"${keycloak.token}"}`
+    }
+});
+----
+
+IMPORTANT: `secureFetch` requires you to set a `Bearer` Authorization header with the Keycloak-managed token. This is how it identifies which requests should be DPoP-protected — if the header is missing or does not match the adapter's token, the request is passed through to `fetch` unchanged with no DPoP proof attached.
+
+When a matching `Bearer` Authorization header is found, `secureFetch` automatically replaces it with the `DPoP` scheme and attaches the required proof.
+
+`secureFetch` handles nonce management internally. If a resource server responds with a `use_dpop_nonce` error, `secureFetch` will automatically retry the request once with the server-provided nonce. If the retry also fails, the error response is returned as-is. In all cases, `secureFetch` returns a standard `Response` object just like `fetch` would.
+
+
 [[_modern_browsers]]
 == Modern Browsers with Tracking Protection
 In the latest versions of some browsers, various cookies policies are applied to prevent tracking of the users by third parties, such as SameSite in Chrome or completely blocked third-party cookies. Those policies are likely to become more restrictive and adopted by other browsers over time. Eventually cookies in third-party contexts may become completely unsupported and blocked by the browsers. As a result, the affected adapter features might ultimately be deprecated.
