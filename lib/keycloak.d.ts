@@ -366,7 +366,7 @@ export interface KeycloakTokenParsed {
   auth_time?: number
   nonce?: string
   acr?: string
-  amr?: string
+  amr?: string[]
   azp?: string
   session_state?: string
   realm_access?: KeycloakRoles
