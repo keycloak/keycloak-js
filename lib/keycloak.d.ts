@@ -114,8 +114,16 @@ export interface KeycloakInitOptions {
    *   adapter: MyCustomAdapter,
    * });
    * ```
+   * 
+   * You can also pass a factory function that receives an adapter context:
+   * 
+   * ```ts
+   * keycloak.init({
+   *   adapter: (context) => createMyCustomAdapter(context),
+   * });
+   * ```
    */
-  adapter?: 'default' | 'cordova' | 'cordova-native' | KeycloakAdapter
+  adapter?: "default" | "cordova" | "cordova-native" | KeycloakAdapter | KeycloakAdapterFactory
 
   /**
    * Specifies an action to do on load.
@@ -335,6 +343,51 @@ export interface KeycloakRedirectUriOptions {
    */
   redirectUri?: string
 }
+
+/**
+ * Context object provided to adapter factory functions.
+ * This exposes internal Keycloak methods to adapters in a controlled manner,
+ * without making these methods part of the public API.
+ */
+export interface KeycloakAdapterContext {
+  /**
+   * Creates a URL for initiating a login flow and stores callback state
+   */
+  createLoginUrl: (options?: KeycloakLoginOptions) => Promise<string>
+  /**
+   * Creates a URL for initiating a logout flow
+   */
+  createLogoutUrl: (options?: KeycloakLogoutOptions) => string
+  /**
+   * Creates a URL for initiating a registration flow
+   */
+  createRegisterUrl: (options?: KeycloakRegisterOptions) => Promise<string>
+  /**
+   * Creates a URL for account management
+   */
+  createAccountUrl: () => string | undefined
+  /**
+   * Clears the current token and associated state
+   */
+  clearToken: () => void
+  /**
+   * Processes the OAuth callback URL after authentication
+   */
+  processCallback: (url: string) => Promise<void>
+  /**
+   * The redirect URI for this Keycloak instance
+   */
+  redirectUri: string
+}
+
+/**
+ * Factory function type for creating adapters.
+ * Adapter factories receive a context object that provides controlled access
+ * to internal Keycloak methods.
+ */
+export type KeycloakAdapterFactory = (
+  context: KeycloakAdapterContext
+) => KeycloakAdapter;
 
 export interface KeycloakAdapter {
   login: (options?: KeycloakLoginOptions) => Promise<void>
