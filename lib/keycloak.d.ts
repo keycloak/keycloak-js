@@ -18,6 +18,7 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 export type KeycloakOnLoad = 'login-required' | 'check-sso'
 export type KeycloakResponseMode = 'query' | 'fragment'
 export type KeycloakResponseType = 'code' | 'id_token token' | 'code id_token token'
@@ -49,19 +50,23 @@ export interface GenericOidcConfig {
 }
 
 /**
- * OpenIdProviderMetadata The OpenID version of the adapter configuration, based on the {@link https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata OpenID Connect Discovery specification}.
+ * OpenIdProviderMetadata The OpenID version of the adapter configuration, based on the {@link https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata OpenID Connect Discovery specification} and {@link https://datatracker.ietf.org/doc/html/rfc9449#section-5.1 RFC 9449 Section 5.1} for DPoP support.
  */
 export interface OpenIdProviderMetadata {
+  /** URL using the https scheme with no query or fragment component that the OP asserts as its Issuer Identifier. */
+  issuer: string
   /** URL of the OP's OAuth 2.0 Authorization Endpoint. */
   authorization_endpoint: string
   /** URL of the OP's OAuth 2.0 Token Endpoint. */
   token_endpoint: string
   /** URL of the OP's UserInfo Endpoint. */
   userinfo_endpoint?: string
-  /**  URL of an OP iframe that supports cross-origin communications for session state information with the RP Client, using the HTML5 postMessage API. */
+  /** URL of an OP iframe that supports cross-origin communications for session state information with the RP Client, using the HTML5 postMessage API. */
   check_session_iframe?: string
   /** URL at the OP to which an RP can perform a redirect to request that the End-User be logged out at the OP. */
   end_session_endpoint?: string
+  /** A JSON array containing a list of the JWS alg values (from the {@link https://www.iana.org/assignments/jose/jose.xhtml [IANA.JOSE.ALGS]} registry) supported by the authorization server for DPoP proof JWTs. */
+  dpop_signing_alg_values_supported?: string[];
 }
 
 export type KeycloakConfig = KeycloakServerConfig | GenericOidcConfig
@@ -228,6 +233,12 @@ export interface KeycloakInitOptions {
    * HTTP method for calling the end_session endpoint. Defaults to 'GET'.
    */
   logoutMethod?: 'GET' | 'POST'
+
+
+  /**
+   * Enables DPoP token auth flows and session key generation.
+   */
+  useDPoP?: DPoPConfig 
 }
 
 export interface KeycloakLoginOptions {
@@ -385,6 +396,16 @@ export interface KeycloakRoles {
 export interface KeycloakUserInfo {
   sub: string
   [key: string]: any
+}
+
+export interface DPoPConfig {
+  /**
+   * 'auto' setting will only use DPoP if the Keycloak instance advertises support,
+   * 'strict' setting will require the Keycloak instance to support DPoP.
+   */
+  mode: 'auto' | 'strict',
+  /** Defaults to ES256 (P-256 curve) */
+  alg?: 'ES256' | 'ES384' | 'ES512' | 'EdDSA'
 }
 
 /**
@@ -682,6 +703,29 @@ declare class Keycloak {
   * @private Undocumented.
   */
   loadUserInfo (): Promise<KeycloakUserInfo>
+
+  /**
+  * Drop-in replacement for fetch that automatically handles DPoP authentication.
+  * If the request includes the KeycloakJS-managed Bearer token, it's replaced with
+  * DPoP authorization and proof. Also manages resource server nonces automatically.
+  * Otherwise, behaves like regular fetch.
+  *
+  * @example
+  * ```typescript
+  * // Call a DPoP-protected API endpoint
+  * const response = await keycloak.secureFetch('https://api.example.com/user', {
+  *   headers: {
+  *     'Authorization': `Bearer ${keycloak.token}`
+  *   }
+  * });
+  * const data = await response.json();
+  * ```
+  *
+  * @param url The resource URL to fetch
+  * @param init Optional fetch init options (same as standard fetch)
+  * @returns A promise that resolves to the fetch Response
+  */
+  secureFetch (url: URL | RequestInfo, init?: RequestInit): Promise<Response>
 }
 
 export default Keycloak
