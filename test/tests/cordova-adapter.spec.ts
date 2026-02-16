@@ -70,32 +70,4 @@ test.describe("Cordova adapter", () => {
     expect(await executor.isAuthenticated()).toBe(false);
     expect(page.context().pages().length).toBe(1);
   });
-
-  // needs fix for https://github.com/keycloak/keycloak-js/issues/208 - we could also drop it
-  test.skip("allow loaderror on InAppBrowser before finishing login", async ({
-    page,
-    appUrl,
-    authServerUrl,
-  }) => {
-    const { executor } = await createTestBed(page, { appUrl, authServerUrl });
-    const initOptions = executor.cordovaInitOptions();
-    await executor.navigateToApp();
-    expect(await executor.initializeAdapter(initOptions)).toBe(false);
-    const refHandle = await setupCordovaMock(page, appUrl, authServerUrl, {
-      onInAppBrowserRedirect: async (refHandle) => {
-        await refHandle.evaluate((ref) => {
-          ref._triggerEvent("loaderror", {
-            type: "loaderror",
-            url: "some other url",
-            code: -2,
-            message: "Simulated loaderror",
-          });
-        });
-      },
-    });
-
-    const loginPromise = executor.login();
-    await expect(loginPromise).resolves.toBeUndefined();
-    expect(await executor.isAuthenticated()).toBe(true);
-  });
 });
