@@ -10,6 +10,7 @@ test.describe("Cordova adapter", () => {
   }) => {
     const { executor } = await createTestBed(page, { appUrl, authServerUrl });
     const initOptions = executor.cordovaInitOptions();
+    await executor.navigateToApp();
     expect(await executor.initializeAdapter(initOptions)).toBe(false);
     expect(await executor.isAuthenticated()).toBe(false);
   });
@@ -21,6 +22,7 @@ test.describe("Cordova adapter", () => {
   }) => {
     const { executor } = await createTestBed(page, { appUrl, authServerUrl });
     const initOptions = executor.cordovaInitOptions();
+    await executor.navigateToApp();
     expect(await executor.initializeAdapter(initOptions)).toBe(false);
     await setupCordovaMock(page, appUrl, authServerUrl);
 
@@ -37,6 +39,7 @@ test.describe("Cordova adapter", () => {
   }) => {
     const { executor } = await createTestBed(page, { appUrl, authServerUrl });
     const initOptions = executor.cordovaInitOptions();
+    await executor.navigateToApp();
     expect(await executor.initializeAdapter(initOptions)).toBe(false);
     const refHandle = await setupCordovaMock(page, appUrl, authServerUrl);
 
@@ -55,6 +58,7 @@ test.describe("Cordova adapter", () => {
   }) => {
     const { executor } = await createTestBed(page, { appUrl, authServerUrl });
     const initOptions = executor.cordovaInitOptions();
+    await executor.navigateToApp();
     expect(await executor.initializeAdapter(initOptions)).toBe(false);
     await setupCordovaMock(page, appUrl, authServerUrl);
 
@@ -75,6 +79,7 @@ test.describe("Cordova adapter", () => {
   }) => {
     const { executor } = await createTestBed(page, { appUrl, authServerUrl });
     const initOptions = executor.cordovaInitOptions();
+    await executor.navigateToApp();
     expect(await executor.initializeAdapter(initOptions)).toBe(false);
     const refHandle = await setupCordovaMock(page, appUrl, authServerUrl, {
       onInAppBrowserRedirect: async (refHandle) => {
