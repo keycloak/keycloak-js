@@ -4,6 +4,7 @@ import { createTestBed, test } from '../support/testbed.ts'
 
 test('creates an account URL with all options', async ({ page, appUrl, authServerUrl }) => {
   const { executor, realm } = await createTestBed(page, { appUrl, authServerUrl })
+  await executor.navigateToApp()
   await executor.initializeAdapter(executor.defaultInitOptions())
   const redirectUri = new URL('/foo/bar', appUrl)
   const accountUrl = new URL(await executor.createAccountUrl({
@@ -16,6 +17,7 @@ test('creates an account URL with all options', async ({ page, appUrl, authServe
 
 test('creates an account URL with default options', async ({ page, appUrl, authServerUrl }) => {
   const { executor, realm } = await createTestBed(page, { appUrl, authServerUrl })
+  await executor.navigateToApp()
   await executor.initializeAdapter(executor.defaultInitOptions())
   const accountUrl = new URL(await executor.createAccountUrl())
   expect(accountUrl.pathname).toBe(`/realms/${realm}/account`)
@@ -26,6 +28,7 @@ test('creates an account URL with default options', async ({ page, appUrl, authS
 test('throws creating an account URL using a generic OpenID provider', async ({ page, appUrl, authServerUrl }) => {
   const { executor, realm } = await createTestBed(page, { appUrl, authServerUrl })
   const oidcProviderUrl = new URL(`/realms/${realm}`, authServerUrl)
+  await executor.navigateToApp()
   await executor.instantiateAdapter({
     clientId: CLIENT_ID,
     oidcProvider: oidcProviderUrl.toString()

@@ -6,6 +6,7 @@ test('refreshes a token', async ({ page, appUrl, authServerUrl }) => {
   const { executor } = await createTestBed(page, { appUrl, authServerUrl })
   const initOptions = executor.defaultInitOptions()
   // Initially, no user should be authenticated and refreshing the token should fail.
+  await executor.navigateToApp()
   expect(await executor.initializeAdapter(initOptions)).toBe(false)
   await expect(executor.updateToken(9999)).rejects.toThrow('Unable to update token, no refresh token available.')
   await executor.login()
@@ -19,6 +20,7 @@ test('refreshes a token with login iframe disabled', async ({ page, appUrl, auth
   const { executor } = await createTestBed(page, { appUrl, authServerUrl })
   const initOptions: KeycloakInitOptions = { ...executor.defaultInitOptions(), checkLoginIframe: false }
   // Initially, no user should be authenticated and refreshing the token should fail.
+  await executor.navigateToApp()
   expect(await executor.initializeAdapter(initOptions)).toBe(false)
   await expect(executor.updateToken(9999)).rejects.toThrow('Unable to update token, no refresh token available.')
   await executor.login()
@@ -33,6 +35,7 @@ test('refreshes a token only if outside of expiry', async ({ page, appUrl, authS
   const initOptions = executor.defaultInitOptions()
   await updateRealm({ accessTokenLifespan: 35 })
   // Initially, no user should be authenticated.
+  await executor.navigateToApp()
   expect(await executor.initializeAdapter(initOptions)).toBe(false)
   await executor.login()
   await executor.submitLoginForm()

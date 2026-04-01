@@ -37,10 +37,13 @@ export class TestExecutor {
     })
   }
 
+  async navigateToApp (): Promise<void> {
+    await this.#page.goto(this.#options.appUrl.toString())
+  }
+
   async instantiateAdapter (config: KeycloakConfig | string = this.defaultConfig()): Promise<void> {
     // Reset the console messages when instantiating the adapter.
     this.#consoleMessages = []
-    await this.#ensureOnAppPage()
     // Wait for the Keycloak constructor to be exposed globally by the app.
     // Sometimes the script that does so is not executed yet, so we need to wait for it.
     await this.#page.waitForFunction(() => 'Keycloak' in globalThis)
@@ -267,12 +270,6 @@ export class TestExecutor {
 
   async reload (): Promise<void> {
     await this.#page.reload()
-  }
-
-  async #ensureOnAppPage (): Promise<void> {
-    if (!this.#page.url().startsWith(this.#options.appUrl.origin)) {
-      await this.#page.goto(this.#options.appUrl.toString())
-    }
   }
 
   async #ensureInstantiated (): Promise<void> {

@@ -7,6 +7,7 @@ test('logs in and out with default configuration', async ({ page, appUrl, authSe
   const { executor } = await createTestBed(page, { appUrl, authServerUrl })
   const initOptions = executor.defaultInitOptions()
   // Initially, no user should be authenticated.
+  await executor.navigateToApp()
   expect(await executor.initializeAdapter(initOptions)).toBe(false)
   expect(await executor.isAuthenticated()).toBe(false)
   await executor.login()
@@ -26,6 +27,7 @@ test('logs in and out using a URL to the adapter config', async ({ page, appUrl,
   const configUrl = new URL('/adapter-config.json', appUrl)
   configUrl.searchParams.set('realm', realm)
   // Initially, no user should be authenticated.
+  await executor.navigateToApp()
   await executor.instantiateAdapter(configUrl.toString())
   expect(await executor.initializeAdapter(initOptions)).toBe(false)
   await executor.login()
@@ -47,6 +49,7 @@ test('logs in and out using a generic OpenID provider', async ({ page, appUrl, a
     oidcProvider: new URL(`/realms/${realm}`, authServerUrl).toString()
   }
   // Initially, no user should be authenticated.
+  await executor.navigateToApp()
   await executor.instantiateAdapter(configOptions)
   expect(await executor.initializeAdapter(initOptions)).toBe(false)
   await executor.login()
@@ -63,6 +66,7 @@ test('logs in and out using a generic OpenID provider', async ({ page, appUrl, a
 test('logs in and out without initialization options', async ({ page, appUrl, authServerUrl }) => {
   const { executor } = await createTestBed(page, { appUrl, authServerUrl })
   // Initially, no user should be authenticated.
+  await executor.navigateToApp()
   expect(await executor.initializeAdapter()).toBe(false)
   await executor.login()
   await executor.submitLoginForm()
@@ -77,6 +81,7 @@ test('logs in and out without PKCE', async ({ page, appUrl, authServerUrl }) => 
   const { executor } = await createTestBed(page, { appUrl, authServerUrl })
   const initOptions: KeycloakInitOptions = { ...executor.defaultInitOptions(), pkceMethod: false }
   // Initially, no user should be authenticated.
+  await executor.navigateToApp()
   expect(await executor.initializeAdapter(initOptions)).toBe(false)
   await executor.login()
   await executor.submitLoginForm()
@@ -91,6 +96,7 @@ test("logs in and out with 'POST' logout configured at initialization", async ({
   const { executor } = await createTestBed(page, { appUrl, authServerUrl })
   const initOptions: KeycloakInitOptions = { ...executor.defaultInitOptions(), logoutMethod: 'POST' }
   // Initially, no user should be authenticated.
+  await executor.navigateToApp()
   expect(await executor.initializeAdapter(initOptions)).toBe(false)
   await executor.login()
   await executor.submitLoginForm()
@@ -105,6 +111,7 @@ test("logs in and out with 'POST' logout configured at logout", async ({ page, a
   const { executor } = await createTestBed(page, { appUrl, authServerUrl })
   const initOptions = executor.defaultInitOptions()
   // Initially, no user should be authenticated.
+  await executor.navigateToApp()
   expect(await executor.initializeAdapter(initOptions)).toBe(false)
   await executor.login()
   await executor.submitLoginForm()
@@ -119,6 +126,7 @@ test('logs in and checks session status', async ({ page, appUrl, authServerUrl, 
   const { executor } = await createTestBed(page, { appUrl, authServerUrl })
   const initOptions = executor.defaultInitOptions()
   // Trigger login and initialize the adapter to check session status.
+  await executor.navigateToApp()
   await executor.initializeAdapter(initOptions)
   await executor.login()
   await executor.submitLoginForm()
@@ -134,6 +142,7 @@ test("logs in and out with onLoad set to 'login-required'", async ({ page, appUr
     onLoad: 'login-required'
   }
   // Initially, no user should be authenticated, and a redirect to the login page should occur.
+  await executor.navigateToApp()
   expect(await executor.initializeAdapter(initOptions, true)).toBe(false)
   await executor.submitLoginForm()
   // After triggering a login, the user should be authenticated.
@@ -150,6 +159,7 @@ test("logs in and out with onLoad set to 'check-sso'", async ({ page, appUrl, au
     onLoad: 'check-sso'
   }
   // Initially, no user should be authenticated, and a redirect should occur in a strict cookie environment.
+  await executor.navigateToApp()
   expect(await executor.initializeAdapter(initOptions, strictCookies)).toBe(false)
   await executor.login()
   await executor.submitLoginForm()

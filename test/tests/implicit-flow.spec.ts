@@ -7,6 +7,7 @@ test('logs in with an implicit flow', async ({ page, appUrl, authServerUrl }) =>
   const implicitFlow: KeycloakInitOptions = { ...executor.defaultInitOptions(), flow: 'implicit' }
   const standardFlow: KeycloakInitOptions = { ...executor.defaultInitOptions(), flow: 'standard' }
   // Initially, no user should be authenticated, and login should fail as implicit flow is disabled.
+  await executor.navigateToApp()
   expect(await executor.initializeAdapter(implicitFlow)).toBe(false)
   await executor.login()
   await expect(executor.initializeAdapter(implicitFlow)).rejects.toMatchObject({
@@ -39,6 +40,7 @@ test('does not allow query response mode with an implicit flow', async ({ page, 
   }
   await updateClient({ implicitFlowEnabled: true, standardFlowEnabled: false })
   // Initially, no user should be authenticated.
+  await executor.navigateToApp()
   expect(await executor.initializeAdapter(initOptions)).toBe(false)
   // Attempting to log in should fail with an error indicating that the query response mode is not allowed for implicit flow.
   await executor.login()
@@ -56,6 +58,7 @@ test('fails refreshing a token for an implicit flow', async ({ page, appUrl, aut
   }
   await updateClient({ implicitFlowEnabled: true, standardFlowEnabled: false })
   // Initially, no user should be authenticated.
+  await executor.navigateToApp()
   expect(await executor.initializeAdapter(initOptions)).toBe(false)
   await executor.login()
   await executor.submitLoginForm()
@@ -74,6 +77,7 @@ test('expires the access token with an implicit flow', async ({ page, appUrl, au
     flow: 'implicit'
   }
   // Initially, no user should be authenticated.
+  await executor.navigateToApp()
   expect(await executor.initializeAdapter(initOptions)).toBe(false)
   await executor.login()
   await executor.submitLoginForm()

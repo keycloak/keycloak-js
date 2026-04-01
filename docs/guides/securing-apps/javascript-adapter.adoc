@@ -52,7 +52,10 @@ try {
 }
 ----
 
-
+[NOTE]
+====
+Because initializing the adapter can cause mutations to the URL of the page, make sure that the adapter is *always* initialized before initializing a router of your client-side framework.
+====
 
 To authenticate, you call the `login` function. Two options exist to make the adapter automatically authenticate. You can pass `login-required` or `check-sso` to the `init()` function.
 

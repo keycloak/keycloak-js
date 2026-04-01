@@ -6,6 +6,7 @@ test('loads the user info', async ({ page, appUrl, authServerUrl }) => {
   const { executor } = await createTestBed(page, { appUrl, authServerUrl })
   const initOptions = executor.defaultInitOptions()
   // Initially, no user should be authenticated and loading the user info should fail.
+  await executor.navigateToApp()
   expect(await executor.initializeAdapter(initOptions)).toBe(false)
   await expect(executor.loadUserInfo()).rejects.toThrow('Unable to build authorization header, token is not set, make sure the user is authenticated.')
   await executor.login()

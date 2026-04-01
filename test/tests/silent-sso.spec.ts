@@ -10,6 +10,7 @@ test('logs in with a silent SSO redirect', async ({ page, appUrl, authServerUrl,
     silentCheckSsoRedirectUri: executor.silentSSORedirectUrl().toString()
   }
   // Initially, no user should be authenticated, and a redirect should occur in a strict cookie environment.
+  await executor.navigateToApp()
   expect(await executor.initializeAdapter(initOptions, strictCookies)).toBe(false)
   await executor.login()
   await executor.submitLoginForm()
@@ -29,6 +30,7 @@ test('logs in with a silent SSO redirect and login iframe disabled', async ({ pa
     checkLoginIframe: false
   }
   // Initially, no user should be authenticated, and a redirect should occur in a strict cookie environment.
+  await executor.navigateToApp()
   expect(await executor.initializeAdapter(initOptions, strictCookies)).toBe(false)
   await executor.login()
   await executor.submitLoginForm()
@@ -48,6 +50,7 @@ test('logs in with a silent SSO redirect and fallback disabled', async ({ page, 
     silentCheckSsoFallback: false
   }
   // Initially, no user should be authenticated.
+  await executor.navigateToApp()
   expect(await executor.initializeAdapter(initOptions)).toBe(false)
   await executor.login()
   await executor.submitLoginForm()

@@ -5,6 +5,7 @@ import { createTestBed, test } from '../support/testbed.ts'
 
 test('creates a logout URL with all options', async ({ page, appUrl, authServerUrl }) => {
   const { executor, realm } = await createTestBed(page, { appUrl, authServerUrl })
+  await executor.navigateToApp()
   await executor.initializeAdapter(executor.defaultInitOptions())
   const redirectUri = new URL('/foo/bar', appUrl)
   const logoutUrl = new URL(await executor.createLogoutUrl({
@@ -19,6 +20,7 @@ test('creates a logout URL with all options', async ({ page, appUrl, authServerU
 
 test('creates a logout URL with default options', async ({ page, appUrl, authServerUrl }) => {
   const { executor, realm } = await createTestBed(page, { appUrl, authServerUrl })
+  await executor.navigateToApp()
   await executor.initializeAdapter(executor.defaultInitOptions())
   const logoutUrl = new URL(await executor.createLogoutUrl())
   expect(logoutUrl.pathname).toBe(`/realms/${realm}/protocol/openid-connect/logout`)
@@ -29,6 +31,7 @@ test('creates a logout URL with default options', async ({ page, appUrl, authSer
 
 test("creates a logout URL with 'POST' method", async ({ page, appUrl, authServerUrl }) => {
   const { executor, realm } = await createTestBed(page, { appUrl, authServerUrl })
+  await executor.navigateToApp()
   await executor.initializeAdapter(executor.defaultInitOptions())
   const redirectUri = new URL('/foo/bar', appUrl)
   const logoutUrl = new URL(await executor.createLogoutUrl({
@@ -45,6 +48,7 @@ test('creates a logout URL using the redirect URL passed during initialization',
   const { executor } = await createTestBed(page, { appUrl, authServerUrl })
   const redirectUri = new URL('/foo/bar', appUrl)
   const initOptions: KeycloakInitOptions = { ...executor.defaultInitOptions(), redirectUri: redirectUri.toString() }
+  await executor.navigateToApp()
   await executor.initializeAdapter(initOptions)
   const logoutUrl = new URL(await executor.createLogoutUrl())
   expect(logoutUrl.searchParams.get('post_logout_redirect_uri')).toBe(redirectUri.toString())
@@ -52,6 +56,7 @@ test('creates a logout URL using the redirect URL passed during initialization',
 
 test('creates a logout URL with the ID token hint when authenticated', async ({ page, appUrl, authServerUrl }) => {
   const { executor } = await createTestBed(page, { appUrl, authServerUrl })
+  await executor.navigateToApp()
   await executor.initializeAdapter()
   await executor.login()
   await executor.submitLoginForm()

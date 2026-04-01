@@ -1,9 +1,26 @@
 import express from 'express'
 import path from 'node:path'
-import { AUTH_SERVER_URL, CLIENT_ID } from '../support/common.ts'
+import { AUTH_SERVER_URL, CLIENT_ID, REDIRECT_SERVICE_URL } from '../support/common.ts'
 
-// Set up Express
 const app = express()
+
+// Expose middleware to simulate a 'redirect service' between the application and auth server.
+app.use((req, res, next) => {
+  if (req.hostname === REDIRECT_SERVICE_URL.hostname) {
+    const { origin } = req.query
+
+    if (typeof origin !== 'string') {
+      res.status(400).send('Missing origin query parameter')
+      return
+    }
+
+    const redirectUrl = new URL(req.originalUrl, origin)
+    redirectUrl.searchParams.delete('origin')
+    res.redirect(redirectUrl.toString())
+    return
+  }
+  next()
+})
 
 // Expose 'public' directory and Keycloak JS source.
 app.use(express.static(path.resolve(import.meta.dirname, 'public')))
@@ -25,5 +42,4 @@ app.get('/adapter-config.json', (req, res) => {
   })
 })
 
-// Start server
 app.listen(3000)
