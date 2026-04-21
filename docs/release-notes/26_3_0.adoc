@@ -1,0 +1,21 @@
+This release of Keycloak JS deprecates the built-in Cordova adapters ahead of their removal in the next major version.
+
+== Deprecations
+
+=== Cordova adapters are deprecated
+
+The built-in `cordova` and `cordova-native` adapters are now deprecated and will be removed in a future major version. Passing `'cordova'` or `'cordova-native'` to the `adapter` init option, or relying on the automatic detection of the `window.cordova` global, will now emit a runtime deprecation warning in the browser console. The `cordovaOptions` property on `KeycloakLoginOptions` is also deprecated.
+
+This decision was made after extensive discussion with the community (https://github.com/keycloak/keycloak-js/issues/271[keycloak/keycloak-js#271], https://github.com/keycloak/keycloak-js/issues/272[keycloak/keycloak-js#272]) and is motivated by the following:
+
+* *Abandoned plugin ecosystem* — The `cordova-native` adapter depends on https://github.com/google/cordova-plugin-browsertab[`cordova-plugin-browsertab`] and https://github.com/e-imaxina/cordova-plugin-deeplinks[`cordova-plugin-deeplinks`], both of which are no longer maintained and are incompatible with recent Android SDK versions, requiring manual patching to function.
+
+* *Security concerns* — The `cordova` adapter uses an embedded WebView (InAppBrowser) for authentication, which gives the host application full control over the browser rendering the login page. This approach is https://www.rfc-editor.org/rfc/rfc8252.txt[discouraged by RFC 8252] (OAuth 2.0 for Native Apps), which recommends using the system browser instead.
+
+* *Lack of testing infrastructure* — The Cordova adapters have no automated test coverage and no clear code ownership, making it difficult to verify fixes or prevent regressions.
+
+* *Declining adoption* — The https://npmtrends.com/cordova[Cordova ecosystem has been on a downward trend since 2019], largely displaced by Capacitor, React Native and Flutter. Maintaining the built-in adapters imposes a disproportionate maintenance burden relative to actual usage.
+
+==== Migration
+
+If you are using Cordova or a similar hybrid app framework, use a <<custom-adapters,custom adapter>> to provide your own implementation. For users migrating to Capacitor, see https://github.com/keycloak/keycloak-js/issues/27[keycloak/keycloak-js#27] for an ongoing discussion on improving the custom adapter interface to better support this use case.
