@@ -1,0 +1,15 @@
+This release of Keycloak JS addresses two regressions in the Cordova adapter that were introduced in version `26.2.1`.
+
+== Bug Fixes
+
+=== Cordova adapter no longer triggers duplicate authentication requests
+
+A regression introduced in version `26.2.1` caused the Cordova in-app browser to fire multiple `loadstart` events before the token exchange completed, resulting in concurrent authentication requests that could fail the login flow. The `completed` flag is now set before awaiting the token exchange, preventing duplicate processing of the redirect URI.
+
+https://github.com/keycloak/keycloak-js/issues/208[keycloak/keycloak-js#208]
+
+=== Cordova in-app browser now closes before awaiting token exchange
+
+A regression introduced in version `26.2.1` caused the Cordova in-app browser to remain open during the asynchronous token exchange, resulting in a brief "Web page not available" error flashing on Android before the browser eventually closed. The browser is now closed immediately after the redirect URI is captured, before the token exchange begins.
+
+https://github.com/keycloak/keycloak-js/issues/209[keycloak/keycloak-js#209]
