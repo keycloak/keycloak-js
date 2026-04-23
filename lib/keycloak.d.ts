@@ -93,8 +93,8 @@ export interface KeycloakInitOptions {
    *
    * The following options are supported:
    * - `default` - Use default APIs that are available in browsers.
-   * - `cordova` - Use a WebView in Cordova.
-   * - `cordova-native` - Use Cordova native APIs, this is recommended over `cordova`.
+   * - `cordova` - **Deprecated.** Use a WebView in Cordova. Use a custom adapter instead.
+   * - `cordova-native` - **Deprecated.** Use Cordova native APIs. Use a custom adapter instead.
    *
    * It's also possible to pass in a custom adapter for the environment you are running Keycloak in. In order to do so extend the `KeycloakAdapter` interface and implement the methods that are defined there.
    *
@@ -300,6 +300,7 @@ export interface KeycloakLoginOptions {
    * Options 'hidden' and 'location' are not affected by these arguments.
    * All available options are defined at https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-inappbrowser/.
    * Example of use: { zoom: "no", hardwareback: "yes" }
+   * @deprecated The built-in Cordova adapters are deprecated and will be removed in a future version. Use a custom adapter instead.
    */
   cordovaOptions?: { [optionName: string]: string }
 }
