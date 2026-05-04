@@ -188,6 +188,8 @@ await keycloak.init({
 [#hybrid-apps-with-cordova]
 == Hybrid Apps with Cordova
 
+WARNING: The built-in `cordova` and `cordova-native` adapters are deprecated and will be removed in a future major version. Use a <<custom-adapters,custom adapter>> instead.
+
 {project_name} supports hybrid mobile apps developed with https://cordova.apache.org/[Apache Cordova]. The adapter has two modes for this: `cordova` and `cordova-native`:
 
 The default is `cordova`, which the adapter automatically selects if no adapter type has been explicitly configured and `window.cordova` is present. When logging in, it opens an https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-inappbrowser/[InApp Browser] that lets the user interact with {project_name} and afterwards returns to the app by redirecting to `http://localhost`. Because of this behavior, you whitelist this URL as a valid redirect-uri in the client configuration section of the Admin Console.
@@ -384,8 +386,8 @@ adapter::
     Allows you to override the way that redirects and other browser-related functions will be handled by the library.
     Available options:
     * "default" - the library uses the browser api for redirects (this is the default)
-    * "cordova" - the library will try to use the InAppBrowser cordova plugin to load keycloak login/registration pages (this is used automatically when the library is working in a cordova ecosystem)
-    * "cordova-native" - the library tries to open the login and registration page using the phone's system browser using the BrowserTabs cordova plugin. This requires extra setup for redirecting back to the app (see <<hybrid-apps-with-cordova>>).
+    * "cordova" - *Deprecated.* the library will try to use the InAppBrowser cordova plugin to load keycloak login/registration pages (this is used automatically when the library is working in a cordova ecosystem)
+    * "cordova-native" - *Deprecated.* the library tries to open the login and registration page using the phone's system browser using the BrowserTabs cordova plugin. This requires extra setup for redirecting back to the app (see <<hybrid-apps-with-cordova>>).
     * "custom" - allows you to implement a custom adapter (only for advanced use cases)
 
 responseType::
@@ -449,7 +451,7 @@ and link:{adminguide_link}#_step-up-flow[Step-up authentication documentation] f
 If the value is `UPDATE_PASSWORD` or another supported required action, the user will be redirected to the reset password page or the other required action page. However, if the user is not authenticated, the user will be sent to the login page and redirected after authentication.
 See link:{adminguide_link}#con-aia_server_administration_guide[Application Initiated Action section] for more details.
 * locale - Sets the 'ui_locales' query param in compliance with https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest[section 3.1.2.1 of the OIDC 1.0 specification].
-* cordovaOptions - Specifies the arguments that are passed to the Cordova in-app-browser (if applicable). Options `hidden` and `location` are not affected by these arguments. All available options are defined at https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-inappbrowser/. Example of use: `{ zoom: "no", hardwareback: "yes" }`;
+* cordovaOptions - *Deprecated.* Specifies the arguments that are passed to the Cordova in-app-browser (if applicable). Options `hidden` and `location` are not affected by these arguments. All available options are defined at https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-inappbrowser/. Example of use: `{ zoom: "no", hardwareback: "yes" }`;
 
 *createLoginUrl(options)*
 
