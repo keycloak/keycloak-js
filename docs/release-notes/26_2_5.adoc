@@ -1,0 +1,11 @@
+This release of Keycloak JS addresses a security issue in the Cordova adapters where OAuth state validation was not enforced on login callbacks.
+
+== Bug Fixes
+
+=== Cordova adapters now validate OAuth state on login callbacks
+
+The `cordova` and `cordova-native` adapters processed OAuth callback data without validating the `state` parameter against the stored value, unlike the default adapter which checks this before processing the callback. This meant forged callback input with a missing or mismatched `state` parameter could be accepted as a legitimate authentication response, allowing externally supplied tokens to set client-side session state.
+
+The adapters now validate the OAuth `state` parameter before processing login callbacks, consistent with the default adapter behavior. Callback input with an invalid state is rejected with a descriptive error.
+
+https://github.com/keycloak/keycloak-js/issues/306[keycloak/keycloak-js#306]
