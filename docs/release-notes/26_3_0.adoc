@@ -1,4 +1,4 @@
-This release of Keycloak JS deprecates the built-in Cordova adapters ahead of their removal in the next major version.
+This release of Keycloak JS deprecates the built-in Cordova adapters and the use of unbound methods ahead of their removal in the next major version.
 
 == Deprecations
 
@@ -19,3 +19,19 @@ This decision was made after extensive discussion with the community (https://gi
 ==== Migration
 
 If you are using Cordova or a similar hybrid app framework, use a <<custom-adapters,custom adapter>> to provide your own implementation. For users migrating to Capacitor, see https://github.com/keycloak/keycloak-js/issues/27[keycloak/keycloak-js#27] for an ongoing discussion on improving the custom adapter interface to better support this use case.
+
+=== Calling methods without a bound `this` is deprecated
+
+Destructuring methods from a `Keycloak` instance (e.g. `const { login } = keycloak`) and calling them without their original `this` context is now deprecated. A deprecation warning will be emitted in the browser console the first time an unbound method is called. In the next major version, this pattern will stop working entirely.
+
+Instead, always call methods directly on the instance:
+
+[source,javascript]
+----
+// Deprecated:
+const { login, logout } = keycloak;
+login();
+
+// Recommended:
+keycloak.login();
+----
