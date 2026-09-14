@@ -238,7 +238,7 @@ export interface KeycloakInitOptions {
   /**
    * Enables DPoP token auth flows and session key generation.
    */
-  useDPoP?: DPoPConfig 
+  dpopConfig?: DPoPConfig
 }
 
 export interface KeycloakLoginOptions {
@@ -719,7 +719,7 @@ declare class Keycloak {
   * @example
   * ```typescript
   * // Call a DPoP-protected API endpoint
-  * const response = await keycloak.secureFetch('https://api.example.com/user', {
+  * const response = await keycloak.fetch('https://api.example.com/user', {
   *   headers: {
   *     'Authorization': `Bearer ${keycloak.token}`
   *   }
@@ -731,7 +731,7 @@ declare class Keycloak {
   * @param init Optional fetch init options (same as standard fetch)
   * @returns A promise that resolves to the fetch Response
   */
-  secureFetch (url: URL | RequestInfo, init?: RequestInit): Promise<Response>
+  fetch (url: URL | RequestInfo, init?: RequestInit): Promise<Response>
 }
 
 export default Keycloak

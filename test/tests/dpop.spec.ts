@@ -238,7 +238,7 @@ test('logs in with OIDC provider configuration', async ({ page, appUrl, authServ
   expect(await executor.isAuthenticated()).toBe(false)
 })
 
-test('calls DPoP-protected resources with secureFetch', async ({ page, appUrl, authServerUrl }) => {
+test('calls DPoP-protected resources with fetch', async ({ page, appUrl, authServerUrl }) => {
   const { executor, updateClient } = await createTestBed(page, { appUrl, authServerUrl })
   await enableDPoPBoundTokens(updateClient)
   const initOptions = dpopInitOptions(executor, { mode: 'auto' })
@@ -264,10 +264,10 @@ test('calls DPoP-protected resources with secureFetch', async ({ page, appUrl, a
   expect(regularFetchResponse.ok).toBe(false)
   expect(regularFetchResponse.status).toBe(401)
 
-  const secureFetchResponse = await page.evaluate(async () => {
+  const fetchResponse = await page.evaluate(async () => {
     const keycloak = (globalThis as any).keycloak
     const userInfoUrl = keycloak.endpoints.userinfo()
-    const resp = await keycloak.secureFetch(userInfoUrl, {
+    const resp = await keycloak.fetch(userInfoUrl, {
       headers: {
         Authorization: `Bearer ${String(keycloak.token)}`
       }
@@ -279,11 +279,11 @@ test('calls DPoP-protected resources with secureFetch', async ({ page, appUrl, a
     }
   })
 
-  expect(secureFetchResponse.status).toBe(200)
-  expect(secureFetchResponse.data).toBeTruthy()
+  expect(fetchResponse.status).toBe(200)
+  expect(fetchResponse.data).toBeTruthy()
 })
 
-test('secureFetch calls open endpoints without DPoP when no Authorization header provided', async ({ page, appUrl, authServerUrl }) => {
+test('fetch calls open endpoints without DPoP when no Authorization header provided', async ({ page, appUrl, authServerUrl }) => {
   const { executor, updateClient, realm } = await createTestBed(page, { appUrl, authServerUrl })
   await enableDPoPBoundTokens(updateClient)
   const initOptions = dpopInitOptions(executor, { mode: 'auto' })
@@ -302,7 +302,7 @@ test('secureFetch calls open endpoints without DPoP when no Authorization header
 
   const response = await page.evaluate(async (url) => {
     const keycloak = (globalThis as any).keycloak
-    const resp = await keycloak.secureFetch(url)
+    const resp = await keycloak.fetch(url)
     const data = await resp.json()
     return {
       status: resp.status,
@@ -315,7 +315,7 @@ test('secureFetch calls open endpoints without DPoP when no Authorization header
   expect(dpopHeaderSent).toBe(false)
 })
 
-test('secureFetch includes correct HTTP method in DPoP proof', async ({ page, appUrl, authServerUrl }) => {
+test('fetch includes correct HTTP method in DPoP proof', async ({ page, appUrl, authServerUrl }) => {
   const { executor, updateClient } = await createTestBed(page, { appUrl, authServerUrl })
   await enableDPoPBoundTokens(updateClient)
   const initOptions = dpopInitOptions(executor, { mode: 'auto' })
@@ -350,7 +350,7 @@ test('secureFetch includes correct HTTP method in DPoP proof', async ({ page, ap
       const keycloak = (globalThis as any).keycloak
       const userInfoUrl = keycloak.endpoints.userinfo()
 
-      await keycloak.secureFetch(userInfoUrl, {
+      await keycloak.fetch(userInfoUrl, {
         method: testMethod,
         headers: {
           Authorization: `Bearer ${String(keycloak.token)}`,
@@ -374,7 +374,7 @@ test('secureFetch includes correct HTTP method in DPoP proof', async ({ page, ap
   }
 })
 
-test('handles concurrent secureFetch calls correctly', async ({ page, appUrl, authServerUrl }) => {
+test('handles concurrent fetch calls correctly', async ({ page, appUrl, authServerUrl }) => {
   const { executor, updateClient } = await createTestBed(page, { appUrl, authServerUrl })
   await enableDPoPBoundTokens(updateClient)
   const initOptions = dpopInitOptions(executor, { mode: 'auto' })
@@ -403,7 +403,7 @@ test('handles concurrent secureFetch calls correctly', async ({ page, appUrl, au
     const userInfoUrl = keycloak.endpoints.userinfo()
 
     const promises = Array(5).fill(null).map(() =>
-      keycloak.secureFetch(userInfoUrl, {
+      keycloak.fetch(userInfoUrl, {
         headers: {
           Authorization: `Bearer ${String(keycloak.token)}`
         }

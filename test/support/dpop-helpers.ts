@@ -9,11 +9,11 @@ export async function enableDPoPBoundTokens (updateClient: TestBed['updateClient
 
 export function dpopInitOptions (
   executor: TestExecutor,
-  useDPoP: NonNullable<KeycloakInitOptions['useDPoP']>
+  dpopConfig: NonNullable<KeycloakInitOptions['dpopConfig']>
 ): KeycloakInitOptions {
   return {
     ...executor.defaultInitOptions(),
-    useDPoP
+    dpopConfig
   }
 }
 
