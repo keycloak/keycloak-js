@@ -41,7 +41,7 @@
     "authentication"
   ],
   "devDependencies": {
-    "jszip": "^3.10.1",
+    "jszip": "^3.10.2",
     "ts-standard": "^12.0.2"
   }
 }
