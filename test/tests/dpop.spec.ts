@@ -152,6 +152,60 @@ test('generates new DPoP key for each login session', async ({ page, appUrl, aut
   expect(secondSessionJwk).not.toBe(firstSessionJwk)
 })
 
+test('generates new DPoP key when clearToken is called', async ({ page, appUrl, authServerUrl }) => {
+  const { executor, updateClient } = await createTestBed(page, { appUrl, authServerUrl })
+  await enableDPoPBoundTokens(updateClient)
+  const initOptions = dpopInitOptions(executor, { mode: 'auto' })
+
+  let firstSessionJwk: string | null = null
+  let secondSessionJwk: string | null = null
+
+  await page.route('**/protocol/openid-connect/token', async (route) => {
+    const headers = route.request().headers()
+
+    if (headers.dpop !== undefined) {
+      try {
+        const header = decodeDPoPProofHeader(headers.dpop)
+        const jwkString = JSON.stringify(header.jwk)
+
+        if (firstSessionJwk === null) {
+          firstSessionJwk = jwkString
+        } else if (secondSessionJwk === null) {
+          secondSessionJwk = jwkString
+        }
+      } catch {
+        // If parsing fails, continue without capturing the JWK.
+      }
+    }
+
+    const response = await route.fetch()
+    const responseBody = await response.text()
+
+    await route.fulfill({
+      response,
+      body: responseBody
+    })
+  })
+
+  await loginWithDPoP(executor, initOptions)
+  expect(firstSessionJwk).not.toBeNull()
+
+  await page.evaluate(async () => {
+    const keycloak = (globalThis as any).keycloak
+    await keycloak.clearToken()
+  })
+
+  expect(await executor.isAuthenticated()).toBe(false)
+
+  await executor.login()
+  await executor.submitLoginForm()
+  expect(await executor.initializeAdapter(initOptions)).toBe(true)
+  expect(await executor.isAuthenticated()).toBe(true)
+
+  expect(secondSessionJwk).not.toBeNull()
+  expect(secondSessionJwk).not.toBe(firstSessionJwk)
+})
+
 test('logs in with OIDC provider configuration', async ({ page, appUrl, authServerUrl }) => {
   const { executor, updateClient, realm } = await createTestBed(page, { appUrl, authServerUrl })
   await enableDPoPBoundTokens(updateClient)

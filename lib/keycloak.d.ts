@@ -406,7 +406,12 @@ export interface DPoPConfig {
    */
   mode: 'auto' | 'strict',
   /** Defaults to ES256 (P-256 curve) */
-  alg?: 'ES256' | 'ES384' | 'ES512' | 'EdDSA'
+  alg?: 'ES256' | 'ES384' | 'ES512' | 'EdDSA',
+  /**
+   * When true, initialization fails if IndexedDB is unavailable instead of
+   * falling back to in-memory key storage.
+   */
+  strictStorage?: boolean
 }
 
 /**
@@ -679,7 +684,7 @@ declare class Keycloak {
   * updating token fails. Invoking this results in Keycloak#onAuthLogout
   * callback listener being invoked.
   */
-  clearToken (): void
+  clearToken (): Promise<void>
 
   /**
   * Returns true if the token has the given realm role.
