@@ -404,9 +404,9 @@ export interface DPoPConfig {
    * 'auto' setting will only use DPoP if the Keycloak instance advertises support,
    * 'strict' setting will require the Keycloak instance to support DPoP.
    */
-  mode: 'auto' | 'strict',
+  mode: 'auto' | 'strict'
   /** Defaults to ES256 (P-256 curve) */
-  alg?: 'ES256' | 'ES384' | 'ES512' | 'EdDSA',
+  alg?: 'ES256' | 'ES384' | 'ES512' | 'EdDSA'
   /**
    * When true, initialization fails if IndexedDB is unavailable instead of
    * falling back to in-memory key storage.
