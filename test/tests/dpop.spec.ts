@@ -197,8 +197,7 @@ test('generates new DPoP key when clearToken is called', async ({ page, appUrl, 
 
   expect(await executor.isAuthenticated()).toBe(false)
 
-  await executor.login()
-  await executor.submitLoginForm()
+  await executor.login() // User is already logged in so no need to fill out form again
   expect(await executor.initializeAdapter(initOptions)).toBe(true)
   expect(await executor.isAuthenticated()).toBe(true)
 
