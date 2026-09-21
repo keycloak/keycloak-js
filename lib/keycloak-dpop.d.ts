@@ -30,6 +30,8 @@ export interface DPoPSignatureProviderOptions {
   requestedAlgorithm?: BrowserSignatureAlgs
   /** If true, throws when IndexedDB unavailable instead of using memory fallback */
   strictStorage?: boolean
+  /** Returns the estimated time skew (browser - server) in seconds */
+  getTimeSkew?: () => number
 }
 
 /**
