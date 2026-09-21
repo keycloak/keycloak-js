@@ -283,6 +283,52 @@ test('calls DPoP-protected resources with fetch', async ({ page, appUrl, authSer
   expect(fetchResponse.data).toBeTruthy()
 })
 
+test('fetch resolves relative URLs like regular fetch', async ({ page, appUrl, authServerUrl }) => {
+  const { executor, updateClient } = await createTestBed(page, { appUrl, authServerUrl })
+  await enableDPoPBoundTokens(updateClient)
+  const initOptions = dpopInitOptions(executor, { mode: 'auto' })
+
+  let capturedAuthorization = ''
+  let capturedProof = ''
+
+  // Serve a mock API endpoint on the app's own origin.
+  await page.route('**/api/users', async (route) => {
+    const headers = route.request().headers()
+    capturedAuthorization = headers.authorization ?? ''
+    capturedProof = headers.dpop ?? ''
+
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([{ id: 1 }])
+    })
+  })
+
+  await loginWithDPoP(executor, initOptions)
+
+  // Call the endpoint with a relative URL, as accepted by regular fetch.
+  const response = await page.evaluate(async () => {
+    const keycloak = (globalThis as any).keycloak
+    const resp = await keycloak.fetch('/api/users', {
+      headers: {
+        Authorization: `Bearer ${String(keycloak.token)}`
+      }
+    })
+    return { status: resp.status }
+  })
+
+  expect(response.status).toBe(200)
+
+  // The Bearer token must have been upgraded to DPoP authorization with a proof.
+  expect(capturedAuthorization).toMatch(/^DPoP /)
+  expect(capturedProof).not.toBe('')
+
+  // The proof must be bound to the URL resolved against the app's origin.
+  const payload = JSON.parse(atob(capturedProof.split('.')[1]))
+  expect(payload.htu).toBe(`${appUrl.origin}/api/users`)
+  expect(payload.htm).toBe('GET')
+})
+
 test('fetch calls open endpoints without DPoP when no Authorization header provided', async ({ page, appUrl, authServerUrl }) => {
   const { executor, updateClient, realm } = await createTestBed(page, { appUrl, authServerUrl })
   await enableDPoPBoundTokens(updateClient)
