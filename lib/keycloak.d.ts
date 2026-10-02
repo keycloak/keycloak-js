@@ -66,7 +66,7 @@ export interface OpenIdProviderMetadata {
   /** URL at the OP to which an RP can perform a redirect to request that the End-User be logged out at the OP. */
   end_session_endpoint?: string
   /** A JSON array containing a list of the JWS alg values (from the {@link https://www.iana.org/assignments/jose/jose.xhtml [IANA.JOSE.ALGS]} registry) supported by the authorization server for DPoP proof JWTs. */
-  dpop_signing_alg_values_supported?: string[];
+  dpop_signing_alg_values_supported?: string[]
 }
 
 export type KeycloakConfig = KeycloakServerConfig | GenericOidcConfig
@@ -233,7 +233,6 @@ export interface KeycloakInitOptions {
    * HTTP method for calling the end_session endpoint. Defaults to 'GET'.
    */
   logoutMethod?: 'GET' | 'POST'
-
 
   /**
    * Enables DPoP token auth flows and session key generation.

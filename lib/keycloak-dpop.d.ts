@@ -39,42 +39,42 @@ export interface DPoPSignatureProviderOptions {
  * @see https://datatracker.ietf.org/doc/html/rfc9449
  */
 export class DPoPSignatureProvider {
-  constructor(options: DPoPSignatureProviderOptions)
+  constructor (options: DPoPSignatureProviderOptions)
 
   /** Initialize the provider. Must be called before generating proofs. */
-  init(): Promise<void>
+  init (): Promise<void>
 
   /**
    * Clear all stored DPoP state (keys and nonce) for this client. Called on logout.
    * Only affects the keys for this specific issuer+clientId combination.
    */
-  flush(): Promise<void>
+  flush (): Promise<void>
 
   /**
    * Get the stored authorization server nonce.
    * @returns The stored nonce, or undefined if none exists
    */
-  getAuthServerNonce(): Promise<string | undefined>
+  getAuthServerNonce (): Promise<string | undefined>
 
   /**
    * Update the authorization server nonce. Called after receiving DPoP-Nonce header.
    * @param nonce - The nonce from the DPoP-Nonce response header
    */
-  updateAuthServerNonce(nonce: string): Promise<void>
+  updateAuthServerNonce (nonce: string): Promise<void>
 
   /**
    * Get the stored resource server nonce for a given origin.
    * @param origin - The resource server origin (e.g., "https://api.example.com")
    * @returns The stored nonce, or undefined if none exists
    */
-  getResourceServerNonce(origin: string): string | undefined
+  getResourceServerNonce (origin: string): string | undefined
 
   /**
    * Update the resource server nonce for a given origin. Called after receiving DPoP-Nonce header.
    * @param origin - The resource server origin
    * @param nonce - The nonce from the DPoP-Nonce response header
    */
-  updateResourceServerNonce(origin: string, nonce: string): void
+  updateResourceServerNonce (origin: string, nonce: string): void
 
   /**
    * Generate a DPoP proof JWT for a request.
@@ -84,5 +84,5 @@ export class DPoPSignatureProvider {
    * @param nonce - Server-provided nonce
    * @returns The DPoP proof JWT
    */
-  generateDPoPProof(url: string, httpMethod: string, accessToken?: string, nonce?: string): Promise<string>
+  generateDPoPProof (url: string, httpMethod: string, accessToken?: string, nonce?: string): Promise<string>
 }
