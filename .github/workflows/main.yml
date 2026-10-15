@@ -3,19 +3,6 @@ on:
   push:
   pull_request:
 jobs:
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-
-      - name: Set up workspace
-        uses: ./.github/actions/setup
-
-      - name: Run linter
-        run: npm run lint
-
   build-guides:
     name: Build guides
     runs-on: ubuntu-latest

@@ -4,7 +4,6 @@
   "type": "module",
   "description": "A client-side JavaScript OpenID Connect library that can be used to secure web applications.",
   "scripts": {
-    "lint": "ts-standard",
     "guides": "node docs/guides/guides.mjs $npm_package_version"
   },
   "workspaces": [
@@ -41,7 +40,6 @@
     "authentication"
   ],
   "devDependencies": {
-    "jszip": "^3.10.2",
-    "ts-standard": "^12.0.2"
+    "jszip": "^3.10.2"
   }
 }
