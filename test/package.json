@@ -7,7 +7,7 @@
     "app": "node app/app.ts"
   },
   "devDependencies": {
-    "@keycloak/keycloak-admin-client": "^26.8.0",
+    "@keycloak/keycloak-admin-client": "^26.8.1",
     "@playwright/test": "^1.64.0",
     "@types/express": "^5.0.6",
     "@types/node": "^26.6.5",
