@@ -191,6 +191,11 @@ export interface KeycloakInitOptions {
   silentCheckSsoFallback?: boolean
 
   /**
+   * Specifies the prefix for the silent check-sso callback.
+   */
+  silentCheckSsoCallbackPrefix?: string
+
+  /**
    * Set the OpenID Connect flow.
    * @default standard
    */
