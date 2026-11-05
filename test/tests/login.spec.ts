@@ -19,6 +19,11 @@ test('logs in and out with default configuration', async ({ page, appUrl, authSe
   // After logging out, the user should no longer be authenticated.
   expect(await executor.initializeAdapter(initOptions)).toBe(false)
   expect(await executor.isAuthenticated()).toBe(false)
+  // Logout again to simulate a call with an unauthenticated user (id token is not present)
+  await executor.logout()
+  // After logging out again, the user should still not be authenticated.
+  expect(await executor.initializeAdapter(initOptions)).toBe(false)
+  expect(await executor.isAuthenticated()).toBe(false)
 })
 
 test('logs in and out using a URL to the adapter config', async ({ page, appUrl, authServerUrl }) => {
@@ -37,6 +42,11 @@ test('logs in and out using a URL to the adapter config', async ({ page, appUrl,
   expect(await executor.initializeAdapter(initOptions)).toBe(true)
   await executor.logout()
   // After logging out, the user should no longer be authenticated.
+  await executor.instantiateAdapter(configUrl.toString())
+  expect(await executor.initializeAdapter(initOptions)).toBe(false)
+  // Logout again to simulate a call with an unauthenticated user (id token is not present)
+  await executor.logout()
+  // After logging out again, the user should still not be authenticated.
   await executor.instantiateAdapter(configUrl.toString())
   expect(await executor.initializeAdapter(initOptions)).toBe(false)
 })
@@ -61,6 +71,11 @@ test('logs in and out using a generic OpenID provider', async ({ page, appUrl, a
   // After logging out, the user should no longer be authenticated.
   await executor.instantiateAdapter(configOptions)
   expect(await executor.initializeAdapter(initOptions)).toBe(false)
+  // Logout again to simulate a call with an unauthenticated user (id token is not present)
+  await executor.logout()
+  // After logging out again, the user should still not be authenticated.
+  await executor.instantiateAdapter(configOptions)
+  expect(await executor.initializeAdapter(initOptions)).toBe(false)
 })
 
 test('logs in and out without initialization options', async ({ page, appUrl, authServerUrl }) => {
@@ -74,6 +89,10 @@ test('logs in and out without initialization options', async ({ page, appUrl, au
   expect(await executor.initializeAdapter()).toBe(true)
   await executor.logout()
   // After logging out, the user should no longer be authenticated.
+  expect(await executor.initializeAdapter()).toBe(false)
+  // Logout again to simulate a call with an unauthenticated user (id token is not present)
+  await executor.logout()
+  // After logging out again, the user should still not be authenticated.
   expect(await executor.initializeAdapter()).toBe(false)
 })
 
@@ -90,6 +109,10 @@ test('logs in and out without PKCE', async ({ page, appUrl, authServerUrl }) => 
   await executor.logout()
   // After logging out, the user should no longer be authenticated.
   expect(await executor.initializeAdapter(initOptions)).toBe(false)
+  // Logout again to simulate a call with an unauthenticated user (id token is not present)
+  await executor.logout()
+  // After logging out again, the user should still not be authenticated.
+  expect(await executor.initializeAdapter(initOptions)).toBe(false)
 })
 
 test("logs in and out with 'POST' logout configured at initialization", async ({ page, appUrl, authServerUrl }) => {
@@ -105,6 +128,10 @@ test("logs in and out with 'POST' logout configured at initialization", async ({
   await executor.logout()
   // After logging out, the user should no longer be authenticated.
   expect(await executor.initializeAdapter(initOptions)).toBe(false)
+  // Logout again to simulate a call with an unauthenticated user (id token is not present)
+  await executor.logout()
+  // After logging out again, the user should still not be authenticated.
+  expect(await executor.initializeAdapter(initOptions)).toBe(false)
 })
 
 test("logs in and out with 'POST' logout configured at logout", async ({ page, appUrl, authServerUrl }) => {
@@ -119,6 +146,10 @@ test("logs in and out with 'POST' logout configured at logout", async ({ page, a
   expect(await executor.initializeAdapter(initOptions)).toBe(true)
   await executor.logout({ logoutMethod: 'POST' })
   // After logging out, the user should no longer be authenticated.
+  expect(await executor.initializeAdapter(initOptions)).toBe(false)
+  // Logout again to simulate a call with an unauthenticated user (id token is not present)
+  await executor.logout({ logoutMethod: 'POST' })
+  // After logging out again, the user should still not be authenticated.
   expect(await executor.initializeAdapter(initOptions)).toBe(false)
 })
 
