@@ -382,7 +382,15 @@ export interface KeycloakTokenParsed {
   session_state?: string
   realm_access?: KeycloakRoles
   resource_access?: KeycloakResourceAccess
+  /** Organization aliases or membership details, depending on the server mapper configuration. */
+  organization?: string | string[] | Record<string, KeycloakOrganizationMembership>
   [key: string]: any // Add other attributes here.
+}
+
+export interface KeycloakOrganizationMembership {
+  id?: string
+  domain?: string | null
+  [attribute: string]: unknown
 }
 
 export interface KeycloakResourceAccess {
